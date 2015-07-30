@@ -32,8 +32,8 @@ io.sockets.on('connection', function (socket) {
 			var elapsed_time = now() - socket.start_time,
 				score = elapsed_time / 60.0;
 
-			socket.send(score.toFixed(2));
-		}, 1000);
+			socket.send(score.toFixed(3));
+		}, 5000);
 	});
 
 	socket.on('disconnect', function(){

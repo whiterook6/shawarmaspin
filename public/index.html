@@ -7,7 +7,7 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css" />
 	</head>
 	<body>
-		<video poster="/img/1080p.png" looping autoplay id="bgvid">
+		<video poster="/img/1080p.png" loop autoplay id="bgvid">
 			<source src="vid/720p.webm" type="video/webm">
 		</video>
 
@@ -47,7 +47,7 @@
 
 				<div class="bg score">
 					<h1>Your Score</h1>
-					<div class="your_score">10345</div>
+					<div class="your_score" id="your_score">0.0</div>
 				</div>
 			</div>
 
@@ -80,14 +80,24 @@
 			</div>
 		</div></div>
 
+		<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 
 var socket = io.connect();
+var score = 0;
 socket.emit('setInitials', 'ass');
 socket.on('message', function(data){
-	console.log(data);
+	score = parseFloat(data);
 });
+
+var your_score_div = $('#your_score');
+var fps=60;
+setInterval(function(){
+	score += (1 / (60 * fps));
+	your_score_div.text(score.toFixed(3));
+}, (1000 / fps));
+
 		</script>
 	</body>
 </html>
