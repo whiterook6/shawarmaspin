@@ -1,0 +1,59 @@
+@font-face {
+	font-family: 'emulogic';
+	src: url('fonts/emulogic.eot');
+	src: local(''), url('emulogic.woff') format('woff'), url('emulogic.ttf') format('truetype'), url('emulogic.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+body {
+	font-family: 'Open Sans', sans-serif;
+}
+
+/* VIDEO */
+#bgvid {
+	background-position: 50% 50%;
+	background-size: cover;
+	background-image: url("/img/1080p.png");
+	background-repeat:  no-repeat;
+	left: 50%;
+	min-width:100%;
+	min-height:100%;
+	position: fixed;
+	top: 50%;
+	-webkit-transform: translateX(-50%) translateY(-50%);
+	-moz-transform: translateX(-50%) translateY(-50%);
+	-ms-transform: translateX(-50%) translateY(-50%);
+	-o-transform: translateX(-50%) translateY(-50%);
+	transform: translateX(-50%) translateY(-50%);
+	z-index: -100;
+}
+
+.bg {
+	background-color: #000;
+	background-color: rgba(0,0,0,0.7);
+	margin: 30px;
+	padding: 1px 15px 15px 15px;
+	color: #F0F0F0;
+}
+
+h1 {
+	text-align: center;
+}
+
+.score {
+	font-family: 'emulogic', monospace;
+}
+
+.score table {
+	text-align: center;
+}
+
+.score table th {
+	text-align: center;
+}
+
+.your_score {
+	font-size: 64px;
+	text-align: center;
+}

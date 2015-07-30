@@ -1,0 +1,11 @@
+{
+	"name": "Shawarmaspin",
+	"version": "0.0.1",
+	"description": "Shawarmaspin web server and websocket server",
+	"dependencies": {
+		"socket.io": "latest",
+		"express": "latest",
+		"jade": "latest"
+	},
+	"author": "whiterook6"
+}
