@@ -1,4 +1,6 @@
 node_modules
 *.webm
 *.log
-
+*.mp3
+*.swf
+*soundmanager*

@@ -82,6 +82,7 @@
 
 		<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
+		<script src="/js/soundmanager2.js"></script>
 		<script>
 
 var socket = io.connect();
@@ -95,8 +96,28 @@ var your_score_div = $('#your_score');
 var fps=60;
 setInterval(function(){
 	score += (1 / (60 * fps));
-	your_score_div.text(score.toFixed(3));
+	if (score < 10){
+		your_score_div.text(score.toFixed(3));
+	} else if (score < 100){
+		your_score_div.text(score.toFixed(2));
+	} else if (score < 1000){
+		your_score_div.text(score.toFixed(1));
+	} else {
+		your_score_div.text(floor(score));
+	}
 }, (1000 / fps));
+
+soundManager.setup({
+	url: '/swf/',
+	onready: function() {
+		var mySound = soundManager.createSound({
+			id: 'aSound',
+			url: '/music/saxroll.mp3',
+			loops: 9999999999999999
+		});
+		mySound.play();
+	}
+});
 
 		</script>
 	</body>
