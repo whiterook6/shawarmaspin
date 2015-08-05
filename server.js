@@ -4,7 +4,7 @@ function log_message(message){
 }
 
 function debug_message(message){
-	log_message(message);
+	// log_message(message);
 }
 
 // timestamp for getting scores
@@ -166,7 +166,7 @@ io.sockets.on('connection', function (socket) {
 			var elapsed_time = now() - socket.start_time,
 				score = elapsed_time / 60.0;
 
-			socket.send(score.toFixed(3));
+			socket.emit('score', score.toFixed(3));
 		}, 5000);
 
 		socket.last_ping_interval = setInterval(function(){
