@@ -8,6 +8,7 @@
 
 body {
 	font-family: 'Open Sans', sans-serif;
+	padding: 30px;
 }
 
 /* VIDEO */
@@ -32,13 +33,15 @@ body {
 .bg {
 	background-color: #000;
 	background-color: rgba(0,0,0,0.7);
-	margin: 30px;
 	padding: 1px 15px 15px 15px;
 	color: #F0F0F0;
+	margin-bottom: 30px;
+	font-size: medium;
 }
 
 h1 {
 	text-align: center;
+	font-size: x-large;
 }
 
 .score {
@@ -54,6 +57,60 @@ h1 {
 }
 
 .your_score {
-	font-size: 64px;
+	font-size: 48px;
 	text-align: center;
+}
+
+#initials_box {
+	display: table;
+	margin-bottom: 10px;
+}
+
+#initials_box .initials_row {
+	display: table-row;
+}
+
+#initials_box .initials_row > * {
+	display: table-cell;
+	padding: 10px;
+	text-align: center;
+	background: none;
+	color: #F0F0F0;
+}
+
+.bg input {
+	border: 2px solid #F0F0F0;
+	border-width: 0 0 2px 0;
+	width: 100%;
+	padding: 10px;
+	text-align: center;
+	background: none;
+	color: #F0F0F0;
+}
+
+.messages {
+	font-size: small;
+	margin-bottom: 10px;
+}
+
+#bottom_row {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	text-align: center;
+}
+
+#bottom_row .bg {
+	margin: 0;
+}
+
+.bg button {
+	border: none;
+	display: block;
+	height: 35px;
+	line-height: 35px;
+	margin: 0 auto;
+	background-color: #F0F0F0;
+	color: black;
 }

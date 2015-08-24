@@ -13,62 +13,168 @@
 		<!-- Reddit -->
 		<meta name="og:image" content="http://www.shawarmaspin.com/img/1080p.png" />
 	</head>
-	<body>
+	<body ng-controller="ShawarmaController as shawarma_ctrl">
 		<video poster="/img/1080p.png" loop autoplay id="bgvid">
 			<source src="vid/720p.webm" type="video/webm">
 		</video>
+<div id="bottom_row">
+	<div class="row">
+		<div class="col-sm-4 col-sm-offset-4">
+			<div class="bg score">
+				<h1>Your Score</h1>
+				<div class="your_score" id="your_score" ng-bind="shawarma_ctrl.display.score"></div>
+			</div>
+		</div>
+	</div>
+</div>
 
-		<div class="wrapper" ng-controller="ShawarmaController as shawarma_ctrl"><div class="row">
-			<!-- Left Column: Scores -->
-			<div class="col-sm-4">
+<div class="wrapper">
 
-				<div class="bg score">
-					<h1>Top Scores</h1>
-					<table class="table" id="high_score_board">
-						<thead>
-							<tr>
-								<th></th>
-								<th>Initials</th>
-								<th>Score</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="score in shawarma_ctrl.high_scores | limitTo:5">
-								<td ng-bind="'#'+ (score.rank + 1)"></td>
-								<td ng-bind="score.initials"></td>
-								<td ng-bind="score.score + ' spins'"></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+	<div class="row">
+			
+		<!-- Left Column: Scores -->
+		<div class="col-sm-4">
 
-				<div class="bg score">
-					<div class="your_score" ng-bind="shawarma_ctrl.initials"></div>
-					<h1>Your Score</h1>
-					<div class="your_score" id="your_score" ng-bind="shawarma_ctrl.display_score"></div>
-				</div>
+			<div class="bg score" ng-if="shawarma_ctrl.player.team">
+				<h1>Top Teams</h1>
+				<table class="table" id="high_score_board">
+					<thead>
+						<tr>
+							<th></th>
+							<th>Team</th>
+							<th>Spins</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="score in shawarma_ctrl.boards.team_scores | limitTo:5">
+							<td ng-bind="'#'+ (score.rank + 1)"></td>
+							<td ng-bind="score.team"></td>
+							<td ng-bind="score.score_minutes"></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 
-			<div class="col-sm-4 col-sm-offset-4">
-				<div class="bg score">
-					<h1>Fellow Spinners</h1>
-					<table class="table" id="online_board">
-						<thead>
-							<tr>
-								<th>Initials</th>
-								<th>Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="online in shawarma_ctrl.online_board">
-								<td ng-bind="online.initials"></td>
-								<td ng-bind="'online'"></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+			<div class="bg score" ng-if="!shawarma_ctrl.player.team">
+				<h1>Top Spinners</h1>
+				<table class="table" id="high_score_board">
+					<thead>
+						<tr>
+							<th></th>
+							<th>Initials</th>
+							<th>Spins</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="score in shawarma_ctrl.boards.high_scores | limitTo:5">
+							<td ng-bind="'#'+ (score.rank + 1)"></td>
+							<td ng-bind="score.initials"></td>
+							<td ng-bind="score.score_minutes"></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
-		</div></div>
+
+			<div class="id_container bg score">
+				<h1>You</h1>
+				<div>
+				<div id="initials_box">
+					<div class="initials_row">
+						<label for="display_team">Team</label>
+						<input type="text" id="display_team" ng-model="shawarma_ctrl.display.team" placeholder="Join a team"/>
+					</div>
+					<div class="initials_row">
+						<label for="display_initials">initials</label>
+						<input type="text" id="display_initials" ng-model="shawarma_ctrl.display.initials" />
+					</div>
+				</div></div>
+				<button id="update_id" class="score" ng-click="shawarma_ctrl.update_name()" ng-if="shawarma_ctrl.needs_name_updated()">Update</button>
+			</div>
+		</div>
+
+		<div class="col-sm-4 col-sm-offset-4" ng-if="shawarma_ctrl.player.team">
+			<div class="bg score">
+				<h1>Team: <span ng-bind="shawarma_ctrl.player.team"></span></h1>
+				
+			</div>
+			<div class="bg score">
+				<h1>Teammates</h1>
+				<table class="table" id="online_board">
+					<thead>
+						<tr>
+							<th>Initials</th>
+							<th>Score</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="online in shawarma_ctrl.boards.team_online">
+							<td ng-bind="online.initials"></td>
+							<td ng-bind="online.score_minutes"></td>
+							<td ng-bind="'Online'"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="bg score">
+				<h1>Team Chat</h1>
+				<div class="messages">
+					<div ng-repeat="message in shawarma_ctrl.messages">
+						<span ng-bind="message.initials"></span> :
+						<span ng-bind="message.message"></span>
+					</div>
+					<div ng-if="shawarma_ctrl.messages.length == 0">
+						No Messages.
+					</div>
+				</div>
+				<form ng-submit="shawarma_ctrl.send_message()">
+					<input type="text" ng-model="shawarma_ctrl.new_message"></input>
+					<button type="submit" ng-if="shawarma_ctrl.new_message">
+						Send
+					</button>
+				</form>
+			</div>
+		</div>
+
+		<div class="col-sm-4 col-sm-offset-4" ng-if="!shawarma_ctrl.player.team">
+			<div class="bg score">
+				<h1>Fellow Spinners</h1>
+				<table class="table" id="online_board">
+					<thead>
+						<tr>
+							<th>Initials</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="online in shawarma_ctrl.boards.online">
+							<td ng-bind="online.initials"></td>
+							<td ng-bind="'Online'"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="bg score">
+				<h1>Global Chat</h1>
+				<div class="messages">
+					<div ng-repeat="message in shawarma_ctrl.messages">
+						<span ng-bind="message.initials"></span> :
+						<span ng-bind="message.message"></span>
+					</div>
+					<div ng-if="shawarma_ctrl.messages.length == 0">
+						No Messages.
+					</div>
+				</div>
+				<form ng-submit="shawarma_ctrl.send_message()">
+					<input type="text" ng-model="shawarma_ctrl.new_message"></input>
+					<button type="submit" ng-if="shawarma_ctrl.new_message">
+						Send
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div></div></div>
 
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>

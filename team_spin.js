@@ -4,7 +4,7 @@ function log_message(message){
 }
 
 function debug_message(message){
-	log_message(message);
+	// log_message(message);
 }
 
 // timestamp for getting scores
@@ -21,12 +21,11 @@ function emit_online_players(){
 			return;
 		}
 
-		debug_message('Updating online-now boards...');
 		connection.query("SELECT `initials`," +
 			" `team`," +
 			" TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
 			" FROM `players`" +
-			" WHERE TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 5" +
+			" WHERE TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1" +
 			" ORDER BY `score_seconds` DESC", [], function(error, results){
 			connection.release();
 			if (error){
@@ -48,7 +47,6 @@ function emit_high_scores(){
 			return;
 		}
 
-		debug_message("Emitting high scores...");
 		connection.query(
 			"SELECT `initials`," +
 			" TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
@@ -61,7 +59,7 @@ function emit_high_scores(){
 				return;
 			}
 
-			io.sockets.emit('high_score', results);
+			io.sockets.emit('high_scores', results);
 			debug_message('High Scores board updated.');
 		});
 	});
@@ -75,7 +73,6 @@ function emit_team_high_scores(){
 			return;
 		}
 
-		debug_message("Emitting team high scores...");
 		connection.query("select sum(TIMESTAMPDIFF(SECOND, connected_at, last_ping)) AS `score_seconds`, `team`" +
 			" FROM `players`" +
 			" WHERE `team` IS NOT NULL" +
@@ -95,7 +92,6 @@ function emit_team_high_scores(){
 	});
 }
 
-
 // Updates for player
 // set 0 score (eg for new initials)
 function reset_score(socket){
@@ -110,7 +106,7 @@ function reset_score(socket){
 			return;
 		}
 
-		connection.query("UPDATE `players` SET `connected_at` = CURRENT_TIMESTAMP, `last_ping` = CURRENT_TIMESTAMP WHERE `player_id` = ?", [socket.player_id], function(error, result){
+		connection.query("UPDATE `players` SET `connected_at` = CURRENT_TIMESTAMP, `last_ping` = CURRENT_TIMESTAMP WHERE `id` = ?", [socket.player_id], function(error, result){
 			connection.release();
 			if (error){
 				log_message("ERROR resetting score: "+error);
@@ -125,10 +121,10 @@ function reset_score(socket){
 	});
 }
 
-// update player team
+// save player team
 function update_team(socket){
-	if (!socket || !socket.player_id || !socket.team){
-		log_message('Error updating team: socket.team is falsey.');
+	if (!socket || !socket.player_id){
+		log_message('Error updating team: socket.player_id is falsey.');
 		return;
 	}
 
@@ -138,20 +134,20 @@ function update_team(socket){
 			return;
 		}
 
-		connection.query("UPDATE `players` SET `team` = ? WHERE `player_id` = ?", [socket.team, socket.player_id], function(error, result){
+		connection.query("UPDATE `players` SET `team` = ? WHERE `id` = ?", [socket.team, socket.player_id], function(error, result){
 			connection.release();
 			if (error){
 				log_message("ERROR updating player team: "+error);
 			} else if (result.changedRows === 0){
-				log_message("ERROR updating player team: No changed rows.");
+				debug_message("Warning updating player team: No changed rows.");
 			} else {
-				debug_message("Player team updated.");
+				debug_message("Player team updated: "+socket.team);
 			}
 		});
 	});
 }
 
-// update player initials
+// save player initials
 function update_initials(socket){
 	if (!socket || !socket.player_id || !socket.initials){
 		log_message('Error updating initials: socket.initials is falsey.');
@@ -164,21 +160,21 @@ function update_initials(socket){
 			return;
 		}
 
-		connection.query("UPDATE `players` SET `initials` = ? WHERE `player_id` = ?", [socket.initials, socket.player_id], function(error, result){
+		connection.query("UPDATE `players` SET `initials` = ? WHERE `id` = ?", [socket.initials, socket.player_id], function(error, result){
 			connection.release();
 			if (error){
 				log_message("ERROR updating player initials: "+error);
 			} else if (result.changedRows === 0){
-				log_message("ERROR updating player initials: No changed rows.");
+				debug_message("Warning updating player initials: No changed rows.");
 			} else {
-				debug_message("Player initials updated.");
+				debug_message("Player initials updated: " +socket.initials);
 			}
 		});
 	});
 }
 
 // create player
-function create_team(socket){
+function create_player(socket){
 	var msg;
 
 	if (!socket || !socket.initials){
@@ -210,7 +206,6 @@ function create_team(socket){
 			connection.release();
 
 			if (error){
-				socket.disconnect();
 				log_message("ERROR creating player: "+error);
 				socket.emit('error', 'ERROR creating player: Query error.');
 				socket.disconnect();
@@ -239,7 +234,6 @@ function ping_player(socket){
 			return;
 		}
 
-		debug_message('Pinging player');
 		var query = connection.query("UPDATE `players` SET `last_ping` = CURRENT_TIMESTAMP WHERE `id` = ?", [socket.player_id], function(error, result){
 			connection.release();
 			if (error){
@@ -253,105 +247,125 @@ function ping_player(socket){
 	});
 }
 
-// Single Player messages
-// send single score to socket
 function send_score(socket){
 	var elapsed_time = now() - socket.start_time,
 		score = elapsed_time / 60.0;
 
-	socket.emit('score', score.toFixed(3));
+	socket.emit('score_minutes', score.toFixed(3));
 }
 
-// update score and team score
-function send_scores(socket){
-	var elapsed_time = now() - socket.start_time,
-		score = elapsed_time / 60.0;
-
-	socket.emit('score', score.toFixed(3));
-
-	if (!socket.team){
+function send_team_online(socket){
+	if (!socket || !socket.team){
 		return;
 	}
 
 	pool.getConnection(function(error, connection){
 		if (error){
-			log_message("ERROR getting team score: cannot get connection: "+error);
+			log_message("ERROR getting team online: error getting connection: "+error);
 			return;
 		}
 
-		connection.query("SELECT SUM(TIMESTAMPDIFF(SECOND, connected_at, last_ping)) AS `score_seconds`, `team`" +
-			" FROM `players`" +
-			" WHERE `team` = '?'" +
-			" AND `id` != ?", [socket.team, socket.player_id], function(error, results){
+		connection.query("SELECT `initials`," +
+			" TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
+			" FROM `players` WHERE TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1" +
+			" AND `team` = ? ORDER BY `score_seconds` DESC ", [socket.team], function(error, results){
 			connection.release();
-			
+
 			if (error){
-				log_message("ERROR querying for team score: "+error);
-				return;
+				log_message('ERROR getting team for player '+socket.initials+': '+error);
+			} else {
+				socket.emit('team_online', results);
 			}
-
-			var team_score = (parseInt(results[0]['score_seconds'], 10)+score);
-
-			io.sockets.emit('team_score', team_score.toFixed(3));
 		});
 	});
 }
 
+function set_update_player_interval(socket){
+	if (socket.update_player_interval){
+		clearInterval(socket.update_player_interval);
+	}
+
+	debug_message('Setting update player interval');
+
+	socket.update_player_interval = setInterval(function(){
+		ping_player(socket);
+		send_score(socket);
+		send_team_online(socket);
+	}, 5000);
+}
+
 // connect new socket
-function connect_socket(socket){
+function connect(socket){
+	debug_message('Connecting socket');
 	socket.start_time = now();
 	socket.initials = 'unk';
 	create_player(socket);
-	socket.last_ping_interval = setInterval(function(){
-		if (socket.player_id){
-			ping_player(socket);
-		}
-	}, 10000);
+	set_update_player_interval(socket);
 
 	socket.on('set_initials', function(data){
-
+		if (data && data != socket.initials){
+			socket.initials = data.trim().toUpperCase().substring(0, 3);
+			
+			debug_message('Incoming initials: '+socket.initials);
+			update_initials(socket);
+			reset_score(socket);
+		}
 	});
 
 	socket.on('set_team', function(data){
+		if (socket.team){
+			socket.leave(socket.team);
+		}
 
+		if (data){
+			if (data != socket.team){
+				socket.team = data.trim().toUpperCase().substring(0, 3);
+				socket.join(socket.team);
+				
+				debug_message('Incoming team: '+socket.team);
+				update_team(socket);
+			}
+		} else {
+			socket.team = null;
+			
+			debug_message('Incoming team: null');
+			update_team(socket);
+		}
 	});
 
 	socket.on('message', function(data){
-
-	});
-
-	socket.on('set_initials', function(data){
-		socket.initials = data.trim().toUpperCase().substring(0, 3);
-		create_player(socket);
-
-		if (socket.score_send_interval){
-			clearInterval(socket.score_send_interval);
+		if (socket.last_message && (now() - socket.last_message) < 10){
+			return;
 		}
 
-		if (socket.last_ping_interval){
-			clearInterval(socket.last_ping_interval);
+		var message = {
+			initials: socket.initials,
+			message: data
+		};
+
+		if (socket.team){
+			message.team = socket.team;
+			socket.broadcast.to(socket.team).emit('message', message);
+		} else {
+			socket.broadcast.emit('message', message);
 		}
 
-		socket.score_send_interval = setInterval(function(){
-			var elapsed_time = now() - socket.start_time,
-				score = elapsed_time / 60.0;
-
-			socket.emit('score', score.toFixed(3));
-		}, 5000);
-
-		socket.last_ping_interval = setInterval(function(){
-			if (socket.player_id){
-				ping_player(socket);
-			}
-		}, 10000);
+		socket.last_message = now();
 	});
 
 	socket.on('disconnect', function(){
-		clearInterval(socket.score_send_interval);
-		clearInterval(socket.last_ping_interval);
+		disconnect(socket);
 	});
 }
 
+function disconnect(socket){
+	if (socket.update_player_interval){
+		clearInterval(socket.update_player_interval);
+	}
+	debug_message('Player '+socket.initials+' disconnecting.');
+
+	socket.disconnect();
+}
 
 // GO
 // Begin
@@ -370,7 +384,7 @@ pool = mysql.createPool({
 	host: 'localhost',
 	user: 'root',
 	password: 'Yorkfi3ld',
-	database: 'shawarma',
+	database: 'shawarma_team',
 	debug: false
 });
 debug_message('DB Pool established.');
@@ -383,16 +397,15 @@ var server = http.createServer(app);
 	io = require('socket.io').listen(server);
 debug_message('Servers ready...');
 
+io.sockets.on('connection', function (socket) {
+	connect(socket);
+});
 
-
-
-
-
-
-
-
-
-
+setInterval(function(){
+	emit_online_players();
+	emit_high_scores();
+	emit_team_high_scores();
+}, 10000);
 
 debug_message('Starting Server...');
 server.listen(80);
