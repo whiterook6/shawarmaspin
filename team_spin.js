@@ -430,7 +430,7 @@ debug_message('Dependencies loaded...');
 
 // get password and connection info
 _prompt.start();
-_prompt.get({
+_prompt.get({properties: {
 	db_host: {
 		required: true,
 		default: 'localhost'
@@ -443,12 +443,12 @@ _prompt.get({
 		required: true,
 		hidden: true
 	}
-}, function(err, result){
+}}, function(err, result){
 	if (err || !result.db_host || !result.db_user || !result.db_pass){
 		log_message("Error prompting.");
 		return;
 	}
-	
+
 	// Connect to DB
 	pool = mysql.createPool({
 		connectionLimit: 100,
