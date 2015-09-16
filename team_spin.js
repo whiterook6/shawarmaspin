@@ -110,9 +110,7 @@ function reset_score(socket){
 			connection.release();
 			if (error){
 				log_message("ERROR resetting score: "+error);
-			} else if (result.changedRows === 0){
-				log_message("ERROR resetting score: No changed rows.");
-			} else {
+			} else if (result.changedRows > 0){
 				debug_message("player score updated.");
 				socket.start_time = now();
 				socket.emit('score', '0.000');
@@ -173,15 +171,68 @@ function update_initials(socket){
 	});
 }
 
+function reconnect(socket){
+	if (!socket){
+		msg = 'Cannot reconnect player: no socket.';
+		log_message(msg);
+		return;
+	}
+
+	socket.emit('test', 'hello');
+	ip = socket.request.connection.remoteAddress;
+	pool.getConnection(function(error, connection){
+		if (error){
+			msg = 'Cannot reconnect player: Cannot get connection';
+			log_message(msg+': '+error);
+			socket.emit('error', msg);
+			socket.disconnect();
+			return;
+		}
+
+		var query = connection.query("SELECT `id`, `connected_at`, `initials`, TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`, `team`" +
+			" FROM `players` WHERE `ip` = INET_ATON(?) AND TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1 ORDER BY `last_ping` DESC LIMIT 1", [ip], function(error, results){
+			connection.release();
+			if (error){
+				log_message("Error reconnecting player. Creating new player instead.");
+				create_player(socket);
+			} else if (results.length === 0){
+				create_player(socket);
+			} else {
+				log_message('Player reconnected');
+
+				result = results[0];
+				socket.initials = result.initials;
+				socket.team = result.team;
+				socket.player_id = result.id;
+
+				var start_time = (result.connected_at+"").split(/[-:T]/);
+				socket.start_time = new Date(start_time[0], start_time[1], start_time[2], start_time[3], start_time[4], start_time[5]);
+
+				socket.emit('new_initials', result.initials);
+				if (results.team){
+					socket.emit('new_team', result.team);
+				}
+			}
+		});
+	});
+}
+
 // create player
 function create_player(socket){
 	var msg;
+
+	if (!socket){
+		msg = 'Cannot create player: socket is falsey.';
+		log_message(msg);
+		return;
+	}
 
 	if (!socket || !socket.initials){
 		msg = 'Cannot create player: socket.initials is falsey.';
 		log_message(msg);
 		socket.emit('error', msg);
 		socket.disconnect();
+
 		return;
 	}
 
@@ -238,9 +289,7 @@ function ping_player(socket){
 			connection.release();
 			if (error){
 				log_message("ERROR updating player last_ping: "+error);
-			} else if (result.changedRows === 0){
-				log_message("ERROR updating player last_ping: No changed rows.");
-			} else {
+			} else if (result.changedRows > 0){
 				debug_message("Player last ping updated.");
 			}
 		});
@@ -299,7 +348,7 @@ function connect(socket){
 	debug_message('Connecting socket');
 	socket.start_time = now();
 	socket.initials = 'unk';
-	create_player(socket);
+	reconnect(socket); // will create player if it doesn't work.
 	set_update_player_interval(socket);
 
 	socket.on('set_initials', function(data){
@@ -405,8 +454,8 @@ setInterval(function(){
 	emit_online_players();
 	emit_high_scores();
 	emit_team_high_scores();
-}, 10000);
+}, 5000);
 
 debug_message('Starting Server...');
-server.listen(80);
+server.listen(8080);
 log_message('Shawarmaspin Webserver running...');

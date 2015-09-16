@@ -27,8 +27,8 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		},
 
 		player: {
-			initials: 'poo',
-			team: 'ass',
+			initials: 'unk',
+			team: null,
 			score_minutes: 0.0
 		},
 
@@ -37,6 +37,10 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	});
 
 	shawarma_ctrl.set_initials = function(){
+		if (shawarma_ctrl.display.initials){
+			shawarma_ctrl.display.initials = shawarma_ctrl.display.initials.substring(0, 3);
+		}
+		
 		if (shawarma_ctrl.player.initials != shawarma_ctrl.display.initials){
 			shawarma_ctrl.player.initials = shawarma_ctrl.display.initials;
 			shawarma_ctrl.socket.emit('set_initials', shawarma_ctrl.player.initials);
@@ -49,6 +53,10 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 
 	shawarma_ctrl.set_team = function(){
+		if (shawarma_ctrl.display.team){
+			shawarma_ctrl.display.team = shawarma_ctrl.display.team.substring(0, 3);
+		}
+		
 		if (shawarma_ctrl.player.team != shawarma_ctrl.display.team){
 			shawarma_ctrl.player.team = shawarma_ctrl.display.team;
 			shawarma_ctrl.socket.emit('set_team', shawarma_ctrl.player.team);
@@ -165,6 +173,24 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 
 		messages.push(data);
+	});
+
+	shawarma_ctrl.socket.on('new_initials', function(data){
+		if (!data){
+			return;
+		}
+
+		shawarma_ctrl.player.initials = data;
+		reset_initials();
+	});
+
+	shawarma_ctrl.socket.on('new_team', function(data){
+		if (!data){
+			return;
+		}
+
+		shawarma_ctrl.player.team = data;
+		reset_team();
 	});
 
 	shawarma_ctrl.interval = 1.0 / 60.0;
