@@ -43,13 +43,15 @@
 							<th></th>
 							<th>Team</th>
 							<th>Spins</th>
+							<th>SPM</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="score in shawarma_ctrl.boards.team_scores | limitTo:5">
+						<tr ng-repeat="score in shawarma_ctrl.boards.team_scores | limitTo:4">
 							<td ng-bind="'#'+ (score.rank + 1)"></td>
 							<td ng-bind="score.team"></td>
 							<td ng-bind="score.score_minutes"></td>
+							<td ng-bind="score.online"></td>
 						</tr>
 					</tbody>
 				</table>
@@ -66,7 +68,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="score in shawarma_ctrl.boards.high_scores | limitTo:5">
+						<tr ng-repeat="score in shawarma_ctrl.boards.high_scores | limitTo:4">
 							<td ng-bind="'#'+ (score.rank + 1)"></td>
 							<td ng-bind="score.initials"></td>
 							<td ng-bind="score.score_minutes"></td>
@@ -81,11 +83,11 @@
 				<div id="initials_box">
 					<div class="initials_row">
 						<label for="display_team">Team</label>
-						<input type="text" id="display_team" ng-model="shawarma_ctrl.display.team" placeholder="Join a team"/>
+						<input type="text" id="display_team" ng-model="shawarma_ctrl.display.team" placeholder="Join a team" maxlength="3"/>
 					</div>
 					<div class="initials_row">
 						<label for="display_initials">initials</label>
-						<input type="text" id="display_initials" ng-model="shawarma_ctrl.display.initials" />
+						<input type="text" id="display_initials" ng-model="shawarma_ctrl.display.initials" maxlength="3"/>
 					</div>
 				</div></div>
 				<button id="update_id" class="score" ng-click="shawarma_ctrl.update_name()" ng-if="shawarma_ctrl.needs_name_updated()">Update</button>
@@ -99,7 +101,7 @@
 			</div>
 			<div class="bg score">
 				<h1>Teammates</h1>
-				<table class="table" id="online_board">
+				<div class="scrollable"><table class="table" id="online_board">
 					<thead>
 						<tr>
 							<th>Initials</th>
@@ -114,12 +116,12 @@
 							<td ng-bind="'Online'"></td>
 						</tr>
 					</tbody>
-				</table>
+				</table></div>
 			</div>
 			<div class="bg score">
 				<h1>Team Chat</h1>
-				<div class="messages">
-					<div ng-repeat="message in shawarma_ctrl.messages">
+				<div class="scrollable messages">
+					<div ng-repeat="message in shawarma_ctrl.messages | limitTo:5">
 						<span ng-bind="message.initials"></span> :
 						<span ng-bind="message.message"></span>
 					</div>
@@ -139,7 +141,7 @@
 		<div class="col-sm-4 col-sm-offset-4" ng-if="!shawarma_ctrl.player.team">
 			<div class="bg score">
 				<h1>Fellow Spinners</h1>
-				<table class="table" id="online_board">
+				<div class="scrollable"><table class="table" id="online_board">
 					<thead>
 						<tr>
 							<th>Initials</th>
@@ -152,11 +154,11 @@
 							<td ng-bind="'Online'"></td>
 						</tr>
 					</tbody>
-				</table>
+				</table></div>
 			</div>
 			<div class="bg score">
 				<h1>Global Chat</h1>
-				<div class="messages">
+				<div class="scrollable messages">
 					<div ng-repeat="message in shawarma_ctrl.messages">
 						<span ng-bind="message.initials"></span> :
 						<span ng-bind="message.message"></span>
