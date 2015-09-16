@@ -424,38 +424,61 @@ log_message('Shawarmaspin starting up...');
 var express = require('express'),
 	http = require('http'),
 	socket_io = require('socket.io'),
-	mysql = require('mysql'); // https://github.com/felixge/node-mysql/
+	mysql = require('mysql'), // https://github.com/felixge/node-mysql/
+	_prompt = require('prompt'); // https://github.com/flatiron/prompt
 debug_message('Dependencies loaded...');
 
-// Connect to DB
-pool = mysql.createPool({
-	connectionLimit: 100,
-	host: 'localhost',
-	user: 'root',
-	password: 'Yorkfi3ld',
-	database: 'shawarma_team',
-	debug: false
+// get password and connection info
+_prompt.start();
+_prompt.get({properties: {
+	db_host: {
+		required: true,
+		default: 'localhost'
+	},
+	db_user: {
+		required: true,
+		default: 'root'
+	},
+	db_pass: {
+		required: true,
+		hidden: true
+	}
+}}, function(err, result){
+	if (err || !result.db_host || !result.db_user || !result.db_pass){
+		log_message("Error prompting.");
+		return;
+	}
+
+	// Connect to DB
+	pool = mysql.createPool({
+		connectionLimit: 100,
+		host: result.db_host,
+		user: result.db_user,
+		password: result.db_pass,
+		database: 'shawarma_team',
+		debug: false
+	});
+	debug_message('DB Pool established.');
+
+	// Create Server
+	var app = express();
+	app.use(express.static(__dirname + '/public'));
+
+	var server = http.createServer(app);
+		io = require('socket.io').listen(server);
+	debug_message('Servers ready...');
+
+	io.sockets.on('connection', function (socket) {
+		connect(socket);
+	});
+
+	setInterval(function(){
+		emit_online_players();
+		emit_high_scores();
+		emit_team_high_scores();
+	}, 5000);
+
+	debug_message('Starting Server...');
+	server.listen(8080);
+	log_message('Shawarmaspin Webserver running...');
 });
-debug_message('DB Pool established.');
-
-// Create Server
-var app = express();
-app.use(express.static(__dirname + '/public'));
-
-var server = http.createServer(app);
-	io = require('socket.io').listen(server);
-debug_message('Servers ready...');
-
-io.sockets.on('connection', function (socket) {
-	connect(socket);
-});
-
-setInterval(function(){
-	emit_online_players();
-	emit_high_scores();
-	emit_team_high_scores();
-}, 5000);
-
-debug_message('Starting Server...');
-server.listen(8080);
-log_message('Shawarmaspin Webserver running...');
