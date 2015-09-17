@@ -36,20 +36,26 @@ body {
 	padding: 1px 15px 15px 15px;
 	color: #F0F0F0;
 	margin-bottom: 30px;
-	font-size: medium;
+	font-size: small;
 }
 
 h1 {
 	text-align: center;
-	font-size: x-large;
+	font-size: large;
 }
 
 .score {
 	font-family: 'emulogic', monospace;
+	font-size: small;
 }
 
 .score table {
 	text-align: center;
+}
+
+.score .scrollable {
+	max-height: 275px;
+	overflow-y: scroll;
 }
 
 .score table th {
