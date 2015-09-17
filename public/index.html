@@ -22,7 +22,8 @@
 		<div class="col-sm-4 col-sm-offset-4">
 			<div class="bg score">
 				<h1>Your Score</h1>
-				<div class="your_score" id="your_score" ng-bind="shawarma_ctrl.display.score"></div>
+				<div class="your_score" id="your_score" ng-bind="shawarma_ctrl.display.score" ng-if="shawarma_ctrl.connected"></div>
+				<div class="your_score disconnected" id="your_score" ng-if="!shawarma_ctrl.connected">Disconnected</div>
 			</div>
 		</div>
 	</div>

@@ -12,84 +12,65 @@ function now(){
 	return (new Date() / 1000.0);
 }
 
-// Broadcast
-// broadcast who's online boards
-function emit_online_players(){
+function then(mysql_date){
+	return (new Date(mysql_date) / 1000.0);
+}
+
+// helper function for running DB calls without special stuff.
+function db_call(query, params, error_msg, success_callback){
 	pool.getConnection(function(error, connection){
 		if (error){
-			log_message("ERROR emitting online players: Cannot get connection: "+error);
+			log_message(error_msg+": Connection error: "+error);
 			return;
 		}
 
-		connection.query("SELECT `initials`," +
-			" `team`," +
-			" TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
-			" FROM `players`" +
-			" WHERE TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1" +
-			" ORDER BY `score_seconds` DESC", [], function(error, results){
+		connection.query(query, params, function(error, results){
 			connection.release();
 			if (error){
-				log_message("ERROR querying for online players: "+error);
-				return;
+				log_message(error_msg+": Query error: "+error);
+			} else {
+				success_callback(results);
 			}
+		});
+	});
+}
 
+// Broadcast
+// broadcast who's online boards
+function emit_online_players(){
+	db_call("SELECT `initials`, `team`, TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
+		" FROM `players`" +
+		" WHERE TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1" +
+		" ORDER BY `score_seconds` DESC",
+		[],
+		"Querying for online players",
+		function(results){
 			io.sockets.emit('online', results);
 			debug_message('Online Player board updated.');
 		});
-	});
 }
 
 // broadcast high score boards for players
 function emit_high_scores(){
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message("ERROR emitting high scores: cannot get connection: "+error);
-			return;
-		}
-
-		connection.query(
-			"SELECT `initials`," +
-			" TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
-			" FROM `players`" +
-			" ORDER BY `score_seconds` DESC LIMIT 10", [], function(error, results){
-			connection.release();
-			
-			if (error){
-				log_message("ERROR querying for high scores: "+error);
-				return;
-			}
-
+	db_call("SELECT `initials`, TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
+		" FROM `players`" +
+		" ORDER BY `score_seconds` DESC LIMIT 10", [], "Querying for high scores", function(results){
 			io.sockets.emit('high_scores', results);
 			debug_message('High Scores board updated.');
 		});
-	});
 }
 
 // broadcast board for high team scores
 function emit_team_high_scores(){
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message("ERROR emitting team high scores: cannot get connection: "+error);
-			return;
-		}
-
-		connection.query("select sum(TIMESTAMPDIFF(SECOND, connected_at, last_ping)) AS `score_seconds`, `team`" +
-			" FROM `players`" +
-			" WHERE `team` IS NOT NULL" +
-			" GROUP BY `team`" +
-			" ORDER BY `score_seconds` DESC" +
-			" LIMIT 5", [], function(error, results){
-			connection.release();
-			
-			if (error){
-				log_message("ERROR querying for team high scores: "+error);
-				return;
-			}
-
+	db_call("select sum(TIMESTAMPDIFF(SECOND, connected_at, last_ping)) AS `score_seconds`, `team`" +
+		" FROM `players`" +
+		" WHERE `team` IS NOT NULL" +
+		" GROUP BY `team`" +
+		" ORDER BY `score_seconds` DESC" +
+		" LIMIT 5", [], "Querying for team high scores", function(results){
 			io.sockets.emit('team_high_scores', results);
 			debug_message('Team High Scores board updated.');
 		});
-	});
 }
 
 // Updates for player
@@ -100,23 +81,16 @@ function reset_score(socket){
 		return;
 	}
 
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message('Error resetting score: Error getting connection: '+error);
-			return;
-		}
-
-		connection.query("UPDATE `players` SET `connected_at` = CURRENT_TIMESTAMP, `last_ping` = CURRENT_TIMESTAMP WHERE `id` = ?", [socket.player_id], function(error, result){
-			connection.release();
-			if (error){
-				log_message("ERROR resetting score: "+error);
-			} else if (result.changedRows > 0){
+	db_call("UPDATE `players` SET `connected_at` = CURRENT_TIMESTAMP, `last_ping` = CURRENT_TIMESTAMP WHERE `id` = ?",
+		[socket.player_id],
+		"Resetting score",
+		function(results){
+			if (results.changedRows > 0){
 				debug_message("player score updated.");
 				socket.start_time = now();
 				socket.emit('score', '0.000');
 			}
 		});
-	});
 }
 
 // save player team
@@ -126,23 +100,16 @@ function update_team(socket){
 		return;
 	}
 
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message('Error updating team: Error getting connection: '+error);
-			return;
-		}
-
-		connection.query("UPDATE `players` SET `team` = ? WHERE `id` = ?", [socket.team, socket.player_id], function(error, result){
-			connection.release();
-			if (error){
-				log_message("ERROR updating player team: "+error);
-			} else if (result.changedRows === 0){
+	db_call("UPDATE `players` SET `team` = ? WHERE `id` = ?",
+		[socket.team, socket.player_id],
+		"Updating player team",
+		function(results){
+			if (results.changedRows === 0){
 				debug_message("Warning updating player team: No changed rows.");
 			} else {
 				debug_message("Player team updated: "+socket.team);
 			}
 		});
-	});
 }
 
 // save player initials
@@ -152,25 +119,19 @@ function update_initials(socket){
 		return;
 	}
 
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message('Error updating initials: Error getting connection: '+error);
-			return;
-		}
-
-		connection.query("UPDATE `players` SET `initials` = ? WHERE `id` = ?", [socket.initials, socket.player_id], function(error, result){
-			connection.release();
-			if (error){
-				log_message("ERROR updating player initials: "+error);
-			} else if (result.changedRows === 0){
+	db_call("UPDATE `players` SET `initials` = ? WHERE `id` = ?",
+		[socket.initials, socket.player_id],
+		"Updating player initials",
+		function(results){
+			if (results.changedRows === 0){
 				debug_message("Warning updating player initials: No changed rows.");
 			} else {
 				debug_message("Player initials updated: " +socket.initials);
 			}
 		});
-	});
 }
 
+// attempt to reconnect player (if less than a minute)
 function reconnect(socket){
 	if (!socket){
 		msg = 'Cannot reconnect player: no socket.';
@@ -178,7 +139,6 @@ function reconnect(socket){
 		return;
 	}
 
-	socket.emit('test', 'hello');
 	ip = socket.request.connection.remoteAddress;
 	pool.getConnection(function(error, connection){
 		if (error){
@@ -189,7 +149,7 @@ function reconnect(socket){
 			return;
 		}
 
-		var query = connection.query("SELECT `id`, `connected_at`, `initials`, TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`, `team`" +
+		var query = connection.query("SELECT `ip`, `id`, `connected_at`, `initials`, TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`, `team`" +
 			" FROM `players` WHERE `ip` = INET_ATON(?) AND TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1 ORDER BY `last_ping` DESC LIMIT 1", [ip], function(error, results){
 			connection.release();
 			if (error){
@@ -198,18 +158,15 @@ function reconnect(socket){
 			} else if (results.length === 0){
 				create_player(socket);
 			} else {
-				log_message('Player reconnected');
-
 				result = results[0];
 				socket.initials = result.initials;
 				socket.team = result.team;
 				socket.player_id = result.id;
-
-				var start_time = (result.connected_at+"").split(/[-:T]/);
-				socket.start_time = new Date(start_time[0], start_time[1], start_time[2], start_time[3], start_time[4], start_time[5]);
+				socket.start_time = then(result.connected_at);
+				ping_player(socket);
 
 				socket.emit('new_initials', result.initials);
-				if (results.team){
+				if (result.team){
 					socket.emit('new_team', result.team);
 				}
 			}
@@ -279,21 +236,14 @@ function ping_player(socket){
 		return;
 	}
 
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message('Error updating ping time: error getting pool connection: '+error);
-			return;
-		}
-
-		var query = connection.query("UPDATE `players` SET `last_ping` = CURRENT_TIMESTAMP WHERE `id` = ?", [socket.player_id], function(error, result){
-			connection.release();
-			if (error){
-				log_message("ERROR updating player last_ping: "+error);
-			} else if (result.changedRows > 0){
+	db_call("UPDATE `players` SET `last_ping` = CURRENT_TIMESTAMP WHERE `id` = ?",
+		[socket.player_id],
+		"Updating player last_ping",
+		function(results){
+			if (results.changedRows > 0){
 				debug_message("Player last ping updated.");
 			}
 		});
-	});
 }
 
 function send_score(socket){
@@ -308,25 +258,13 @@ function send_team_online(socket){
 		return;
 	}
 
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message("ERROR getting team online: error getting connection: "+error);
-			return;
-		}
-
-		connection.query("SELECT `initials`," +
-			" TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
-			" FROM `players` WHERE TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1" +
-			" AND `team` = ? ORDER BY `score_seconds` DESC ", [socket.team], function(error, results){
-			connection.release();
-
-			if (error){
-				log_message('ERROR getting team for player '+socket.initials+': '+error);
-			} else {
-				socket.emit('team_online', results);
-			}
+	db_call("SELECT `initials`, TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`" +
+		" FROM `players` WHERE TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1" +
+		" AND `team` = ? ORDER BY `score_seconds` DESC ",
+		[socket.team],
+		"Getting team for player "+socket.initials, function(results){
+			socket.emit('team_online', results);
 		});
-	});
 }
 
 function set_update_player_interval(socket){
@@ -468,9 +406,7 @@ _prompt.get({properties: {
 		io = require('socket.io').listen(server);
 	debug_message('Servers ready...');
 
-	io.sockets.on('connection', function (socket) {
-		connect(socket);
-	});
+	io.sockets.on('connection', connect);
 
 	setInterval(function(){
 		emit_online_players();
