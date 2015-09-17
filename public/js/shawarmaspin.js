@@ -47,9 +47,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	};
 	shawarma_ctrl.reset_initials = function(){
-		if (shawarma_ctrl.display.initials != shawarma_ctrl.player.initials){
-			shawarma_ctrl.display.initials = shawarma_ctrl.player.initials;
-		}
+		shawarma_ctrl.display.initials = shawarma_ctrl.player.initials;
 	};
 
 	shawarma_ctrl.set_team = function(){
@@ -64,9 +62,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	};
 	shawarma_ctrl.reset_team = function(){
-		if (shawarma_ctrl.display.team != shawarma_ctrl.player.team){
-			shawarma_ctrl.display.team = shawarma_ctrl.player.team;
-		}
+		shawarma_ctrl.display.team = shawarma_ctrl.player.team;
 	};
 
 	shawarma_ctrl.update_name = function(){
@@ -93,11 +89,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		shawarma_ctrl.set_team();
 		shawarma_ctrl.player.score = 0.0;
 		shawarma_ctrl.display.score = 0.0;
-
-		shawarma_ctrl.reset_initials();
-		shawarma_ctrl.reset_team();
-		shawarma_ctrl.socket.emit('set_initials', shawarma_ctrl.player.initials);
-		shawarma_ctrl.socket.emit('set_team', shawarma_ctrl.player.team);
+		shawarma_ctrl.connected = true;
 	});
 
 	shawarma_ctrl.socket.on('online', function(data){
@@ -141,7 +133,8 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 			shawarma_ctrl.boards.team_scores.push({
 				rank: i,
 				team: datum.team,
-				score_minutes: print_score(datum.score_seconds / 60.0)
+				score_minutes: print_score(datum.score_seconds / 60.0),
+				spm: datum.spm
 			});
 		}
 	});
@@ -181,7 +174,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 
 		shawarma_ctrl.player.initials = data;
-		reset_initials();
+		shawarma_ctrl.reset_initials();
 	});
 
 	shawarma_ctrl.socket.on('new_team', function(data){
@@ -190,7 +183,12 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 
 		shawarma_ctrl.player.team = data;
-		reset_team();
+		shawarma_ctrl.reset_team();
+	});
+
+	shawarma_ctrl.socket.on('disconnect', function(data){
+		shawarma_ctrl.connected = false;
+		shawarma_ctrl.socket.disconnect();
 	});
 
 	shawarma_ctrl.interval = 1.0 / 60.0;

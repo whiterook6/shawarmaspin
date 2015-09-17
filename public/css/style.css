@@ -107,6 +107,12 @@ h1 {
 	text-align: center;
 }
 
+#bottom_row .disconnected {
+	color: red;
+	font-size: 32px;
+	text-align: center;
+}
+
 #bottom_row .bg {
 	margin: 0;
 }
