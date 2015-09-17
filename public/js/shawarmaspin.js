@@ -133,7 +133,8 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 			shawarma_ctrl.boards.team_scores.push({
 				rank: i,
 				team: datum.team,
-				score_minutes: print_score(datum.score_seconds / 60.0)
+				score_minutes: print_score(datum.score_seconds / 60.0),
+				spm: datum.spm
 			});
 		}
 	});

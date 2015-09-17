@@ -62,12 +62,18 @@ function emit_high_scores(){
 
 // broadcast board for high team scores
 function emit_team_high_scores(){
-	db_call("select sum(TIMESTAMPDIFF(SECOND, connected_at, last_ping)) AS `score_seconds`, `team`" +
-		" FROM `players`" +
-		" WHERE `team` IS NOT NULL" +
-		" GROUP BY `team`" +
-		" ORDER BY `score_seconds` DESC" +
-		" LIMIT 5", [], "Querying for team high scores", function(results){
+	db_call(" SELECT" +
+			" SUM(TIMESTAMPDIFF(SECOND, connected_at, last_ping)) AS `score_seconds`," +
+			" `team`," +
+			" count(CASE WHEN TIMESTAMPDIFF(MINUTE, last_ping, CURRENT_TIMESTAMP) <= 1 THEN 1 END) as `spm`" +
+		" FROM" +
+			" `players`" +
+		" WHERE" +
+			" `team` IS NOT NULL" +
+		" GROUP BY" +
+			" `team`" +
+		" ORDER BY" +
+			" `score_seconds` DESC LIMIT 5;", [], "Querying for team high scores", function(results){
 			io.sockets.emit('team_high_scores', results);
 			debug_message('Team High Scores board updated.');
 		});
@@ -129,49 +135,6 @@ function update_initials(socket){
 				debug_message("Player initials updated: " +socket.initials);
 			}
 		});
-}
-
-// attempt to reconnect player (if less than a minute)
-function reconnect(socket){
-	if (!socket){
-		msg = 'Cannot reconnect player: no socket.';
-		log_message(msg);
-		return;
-	}
-
-	ip = socket.request.connection.remoteAddress;
-	pool.getConnection(function(error, connection){
-		if (error){
-			msg = 'Cannot reconnect player: Cannot get connection';
-			log_message(msg+': '+error);
-			socket.emit('error', msg);
-			socket.disconnect();
-			return;
-		}
-
-		var query = connection.query("SELECT `ip`, `id`, `connected_at`, `initials`, TIMESTAMPDIFF(SECOND, connected_at, last_ping) AS `score_seconds`, `team`" +
-			" FROM `players` WHERE `ip` = INET_ATON(?) AND TIMESTAMPDIFF(MINUTE, last_ping, NOW()) < 1 ORDER BY `last_ping` DESC LIMIT 1", [ip], function(error, results){
-			connection.release();
-			if (error){
-				log_message("Error reconnecting player. Creating new player instead.");
-				create_player(socket);
-			} else if (results.length === 0){
-				create_player(socket);
-			} else {
-				result = results[0];
-				socket.initials = result.initials;
-				socket.team = result.team;
-				socket.player_id = result.id;
-				socket.start_time = then(result.connected_at);
-				ping_player(socket);
-
-				socket.emit('new_initials', result.initials);
-				if (result.team){
-					socket.emit('new_team', result.team);
-				}
-			}
-		});
-	});
 }
 
 // create player
@@ -286,7 +249,8 @@ function connect(socket){
 	debug_message('Connecting socket');
 	socket.start_time = now();
 	socket.initials = 'unk';
-	reconnect(socket); // will create player if it doesn't work.
+	// reconnect(socket); // will create player if it doesn't work.
+	create_player(socket);
 	set_update_player_interval(socket);
 
 	socket.on('set_initials', function(data){
