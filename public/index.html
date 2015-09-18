@@ -4,11 +4,17 @@
 		<title>Shawarmaspin</title>
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap-social.css">
 		<link rel="stylesheet" type="text/css" href="css/style.css" />
 
 		<!-- Facebook info -->
 		<link rel="image_src" href="http://www.shawarmaspin.com/img/1080p.png" title="Shawarmaspin" />
 		<meta name="description" content="Need to satisfy your craving for spinning meat, but not at a private computer? Try Shawarmaspin.com, your SFW spinning meat alternative." />
+		<meta property="og:url" content="http://www.shawarmaspin.com" />
+	    <meta property="og:type" content="website" />
+	    <meta property="og:title" content="Shawarmaspin" />
+	    <meta property="og:description" content="Need to satisfy your craving for spinning meat, but not at a private computer? Try Shawarmaspin.com, your SFW spinning meat alternative." />
 
 		<!-- Reddit -->
 		<meta name="og:image" content="http://www.shawarmaspin.com/img/1080p.png" />
@@ -17,6 +23,7 @@
 		<video poster="/img/1080p.png" loop autoplay id="bgvid">
 			<source src="vid/720p.webm" type="video/webm">
 		</video>
+
 <div id="bottom_row">
 	<div class="row">
 		<div class="col-sm-4 col-sm-offset-4">
@@ -95,7 +102,26 @@
 			</div>
 		</div>
 
-		<div class="col-sm-4 col-sm-offset-4" ng-if="shawarma_ctrl.player.team">
+		<!-- Social buttons -->
+		<div class="col-sm-4" id="social_buttons">
+			<a class="btn btn-social-icon btn-reddit"
+				href="https://www.reddit.com/submit?url=http%3A%2F%2Fwww.sharmaspin.com&title=Need%20to%20satisfy%20your%20craving%20for%20spinning%20meat%2C%20at%20work%3F%20Try%20shawarmaspin.com%2C%20your%20SFW%20spinning%20meat%20alternative"
+				target="_blank"><i class="fa fa-reddit"></i></a>
+			<a class="btn btn-social-icon btn-facebook"
+				href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fwww.sharmaspin.com"
+				target="_blank"><i class="fa fa-facebook"></i></a>
+			<a class="btn btn-social-icon btn-twitter"
+				href="https://twitter.com/intent/tweet?text=Need%20to%20satisfy%20your%20craving%20for%20spinning%20meat%2C%20at%20work%3F%20Try%20shawarmaspin.com%2C%20your%20SFW%20spinning%20meat%20alternative&source=webclient"
+				target="_blank"><i class="fa fa-twitter"></i></a>
+			<a class="btn btn-social-icon btn-google"
+				href="https://plus.google.com/share?url=http%3A%2F%2Fwww.sharmaspin.com"
+				target="_blank"><i class="fa fa-google"></i></a>
+			<a class="btn btn-social-icon btn-tumblr"
+				href="https://www.tumblr.com/widgets/share/tool?canonicalUrl=http%3A%2F%2Fwww.sharmaspin.com"
+				target="_blank"><i class="fa fa-tumblr"></i></a>
+		</div>
+
+		<div class="col-sm-4" ng-if="shawarma_ctrl.player.team">
 			<div class="bg score">
 				<h1>Team: <span ng-bind="shawarma_ctrl.player.team"></span></h1>
 				
@@ -139,7 +165,7 @@
 			</div>
 		</div>
 
-		<div class="col-sm-4 col-sm-offset-4" ng-if="!shawarma_ctrl.player.team">
+		<div class="col-sm-4" ng-if="!shawarma_ctrl.player.team">
 			<div class="bg score">
 				<h1>Fellow Spinners</h1>
 				<div class="scrollable"><table class="table" id="online_board">
