@@ -173,7 +173,9 @@
 
 		<div class="col-sm-4" ng-if="!shawarma_ctrl.player.team">
 			<div class="bg score">
-				<h1>Fellow Spinners</h1>
+				<h1>Fellow Spinners
+					<span ng-bind="'('+shawarma_ctrl.boards.online.length + ' online)'"></span>
+				</h1>
 				<div class="scrollable"><table class="table" id="online_board">
 					<thead>
 						<tr>
