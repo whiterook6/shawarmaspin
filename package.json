@@ -7,7 +7,9 @@
 		"express": "latest",
 		"jade": "latest",
 		"mysql": "latest",
-		"prompt": "latest"
+		"prompt": "latest",
+		"bower": "latest",
+		"gulp": "latest"
 	},
 	"author": "whiterook6"
 }
