@@ -16,25 +16,6 @@ function then(mysql_date){
 	return (new Date(mysql_date) / 1000.0);
 }
 
-// helper function for running DB calls without special stuff.
-function db_call(query, params, error_msg, success_callback){
-	pool.getConnection(function(error, connection){
-		if (error){
-			log_message(error_msg+": Connection error: "+error);
-			return;
-		}
-
-		connection.query(query, params, function(error, results){
-			connection.release();
-			if (error){
-				log_message(error_msg+": Query error: "+error);
-			} else {
-				success_callback(results);
-			}
-		});
-	});
-}
-
 
 // GO
 // Begin
@@ -46,7 +27,7 @@ var express = require('express'),
 	socket_io = require('socket.io'),
 	mysql = require('mysql'), // https://github.com/felixge/node-mysql/
 	_prompt = require('prompt'); // https://github.com/flatiron/prompt
-require('./lib')();
+var sh = require('./lib')();
 debug_message('Dependencies loaded...');
 
 // get password and connection info
