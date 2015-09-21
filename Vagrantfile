@@ -2,8 +2,11 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
+debconf-set-selections <<< 'mysql-server mysql-server/root_password password password'
+debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password password'
+
 sudo apt-get update
-sudo apt-get install -y npm nodejs-legacy
+sudo apt-get install -y mysql-server npm nodejs-legacy
 cd /vagrant
 npm install --quiet
 SCRIPT

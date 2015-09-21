@@ -36,7 +36,7 @@ _prompt.get({properties: {
 		host: result.db_host,
 		user: result.db_user,
 		password: result.db_pass,
-		database: 'shawarma_team',
+		database: 'gyro_development',
 		debug: false
 	});
 	Logger.message('DB Pool established.');

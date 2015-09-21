@@ -9,7 +9,9 @@
 		"mysql": "latest",
 		"prompt": "latest",
 		"bower": "latest",
-		"gulp": "latest"
+		"gulp": "latest",
+		"sequelize": "~3.9.0",
+		"sequelize-cli": "~1.9.1"
 	},
 	"author": "whiterook6"
 }
