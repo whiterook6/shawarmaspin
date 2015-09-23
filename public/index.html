@@ -168,42 +168,46 @@
 				</table></div>
 			</div>
 
-			<div class="bg score" ng-if="shawarma_ctrl.player.team">
-				<h1>Team Chat</h1>
-				<div class="scrollable messages">
-					<div ng-repeat="message in shawarma_ctrl.messages_team">
-						<span ng-bind="message.initials"></span> :
-						<span ng-bind="message.message"></span>
-					</div>
-					<div ng-if="shawarma_ctrl.messages_team.length == 0">
-						No Messages.
-					</div>
-				</div>
-				<form ng-submit="shawarma_ctrl.send_message_team()">
-					<input type="text" ng-model="shawarma_ctrl.new_message_team"></input>
-					<button type="submit" ng-if="shawarma_ctrl.new_message_team">
-						Send
-					</button>
-				</form>
-			</div>
-
 			<div class="bg score">
-				<h1>Global Chat</h1>
-				<div class="scrollable messages">
-					<div ng-repeat="message in shawarma_ctrl.messages_global">
-						<span ng-bind="message.initials"></span> :
-						<span ng-bind="message.message"></span>
-					</div>
-					<div ng-if="shawarma_ctrl.messages_global.length == 0">
-						No Messages.
-					</div>
+				<h1>Chat</h1>
+				<div class="tabs">
+					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'global'">Global</h1>
+					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'team'" ng-if="shawarma_ctrl.player.team">Team</h1>
 				</div>
-				<form ng-submit="shawarma_ctrl.send_message_global()">
-					<input type="text" ng-model="shawarma_ctrl.new_message_global"></input>
-					<button type="submit" ng-if="shawarma_ctrl.new_message_global">
-						Send
-					</button>
-				</form>
+				<div ng-if="shawarma_ctrl.player.team && shawarma_ctrl.chatrooms.view === 'team'">
+					<div class="scrollable messages">
+						<div ng-repeat="message in shawarma_ctrl.messages_team">
+							<span ng-bind="message.initials"></span> :
+							<span ng-bind="message.message"></span>
+						</div>
+						<div ng-if="shawarma_ctrl.messages_team.length == 0">
+							No Messages.
+						</div>
+					</div>
+					<form ng-submit="shawarma_ctrl.send_message_team()" class="message-form">
+						<input type="text" ng-model="shawarma_ctrl.new_message_team"></input>
+						<button type="submit" ng-if="shawarma_ctrl.new_message_team">
+							Send
+						</button>
+					</form>
+				</div>
+				<div ng-if="shawarma_ctrl.chatrooms.view === 'global'">
+					<div class="scrollable messages">
+						<div ng-repeat="message in shawarma_ctrl.messages_global">
+							<span ng-bind="message.initials"></span> :
+							<span ng-bind="message.message"></span>
+						</div>
+						<div ng-if="shawarma_ctrl.messages_global.length == 0">
+							No Messages.
+						</div>
+					</div>
+					<form ng-submit="shawarma_ctrl.send_message_global()" class="message-form">
+						<input type="text" ng-model="shawarma_ctrl.new_message_global"></input>
+						<button type="submit" ng-if="shawarma_ctrl.new_message_global">
+							Send
+						</button>
+					</form>
+				</div>
 			</div>
 		</div>
 

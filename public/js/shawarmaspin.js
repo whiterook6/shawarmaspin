@@ -32,6 +32,10 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 			score_minutes: 0.0
 		},
 
+		chatrooms: {
+			options: ['global', 'team'],
+			view: 'global'
+		},
 		messages_global: [],
 		messages_team: [],
 		new_message: null
