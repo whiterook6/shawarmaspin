@@ -5,38 +5,35 @@ var express = require('express'),
 	mysql = require('mysql'), // https://github.com/felixge/node-mysql/
 	_prompt = require('prompt'); // https://github.com/flatiron/prompt
 
+var env = process.env.NODE_ENV || 'development';
+var config = require('./config/config.js');
 require('./lib')();
+
+
 Logger.message('Shawarmaspin starting up...')
 Logger.message('Dependencies loaded...');
 
 // get password and connection info
 _prompt.start();
 _prompt.get({properties: {
-	db_host: {
-		required: true,
-		default: 'localhost'
-	},
-	db_user: {
-		required: true,
-		default: 'root'
-	},
 	db_pass: {
 		required: true,
 		hidden: true
 	}
-}}, function(err, result){
-	if (err || !result.db_host || !result.db_user || !result.db_pass){
+}}, function(err, input){
+	if (err){
 		Logger.message("Error prompting.");
+		Logger.message(err);
 		return;
 	}
 
 	// Connect to DB
 	pool = mysql.createPool({
 		connectionLimit: 100,
-		host: result.db_host,
-		user: result.db_user,
-		password: result.db_pass,
-		database: 'gyro_development',
+		host: config.database.host,
+		user: config.database.username,
+		password: input.db_pass,
+		database: config.database.database,
 		debug: false
 	});
 	Logger.message('DB Pool established.');
@@ -58,6 +55,6 @@ _prompt.get({properties: {
 	}, 5000);
 
 	Logger.message('Starting Server...');
-	server.listen(8080);
+	server.listen(config.server.port);
 	Logger.message('Shawarmaspin Webserver running...');
 });
