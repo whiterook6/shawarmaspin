@@ -135,5 +135,7 @@ h1 {
 	width: 100%;
 }
 .tabs h1 {
+	border-bottom: 2px solid #F0F0F0;
 	display: table-cell;
+	padding: 8px;
 }
