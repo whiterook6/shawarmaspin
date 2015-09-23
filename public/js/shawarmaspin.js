@@ -32,7 +32,8 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 			score_minutes: 0.0
 		},
 
-		messages: [],
+		messages_global: [],
+		messages_team: [],
 		new_message: null
 	});
 
@@ -58,7 +59,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		if (shawarma_ctrl.player.team != shawarma_ctrl.display.team){
 			shawarma_ctrl.player.team = shawarma_ctrl.display.team;
 			shawarma_ctrl.socket.emit('set_team', shawarma_ctrl.player.team);
-			shawarma_ctrl.messages = [];
+			shawarma_ctrl.messages_team = [];
 		}
 	};
 	shawarma_ctrl.reset_team = function(){
@@ -72,14 +73,24 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	shawarma_ctrl.needs_name_updated = function(){
 		return ((shawarma_ctrl.player.initials != shawarma_ctrl.display.initials) || (shawarma_ctrl.player.team != shawarma_ctrl.display.team));
 	};
-	shawarma_ctrl.send_message = function(){
-		if (shawarma_ctrl.new_message){
-			shawarma_ctrl.messages.push({
+	shawarma_ctrl.send_message_global = function(){
+		if (shawarma_ctrl.new_message_global){
+			shawarma_ctrl.messages_global.push({
 				initials: shawarma_ctrl.player.initials,
-				message: shawarma_ctrl.new_message
+				message: shawarma_ctrl.new_message_global
 			});
-			shawarma_ctrl.socket.emit('message', shawarma_ctrl.new_message);
-			shawarma_ctrl.new_message = null;
+			shawarma_ctrl.socket.emit('message.global', shawarma_ctrl.new_message_global);
+			shawarma_ctrl.new_message_global = null;
+		}
+	};
+	shawarma_ctrl.send_message_team = function(){
+		if (shawarma_ctrl.new_message_team){
+			shawarma_ctrl.messages_team.push({
+				initials: shawarma_ctrl.player.initials,
+				message: shawarma_ctrl.new_message_team
+			});
+			shawarma_ctrl.socket.emit('message.team', shawarma_ctrl.new_message_team);
+			shawarma_ctrl.new_message_team = null;
 		}
 	};
 
@@ -154,12 +165,26 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	});
 
-	shawarma_ctrl.socket.on('message', function(data){
+	shawarma_ctrl.socket.on('message.global', function(data){
 		if (!data){
 			return;
 		}
 
-		var messages = shawarma_ctrl.messages;
+		var messages = shawarma_ctrl.messages_global;
+
+		if (messages.length > 10){
+			messages.shift();
+		}
+
+		messages.push(data);
+	});
+
+	shawarma_ctrl.socket.on('message.team', function(data){
+		if (!data){
+			return;
+		}
+
+		var messages = shawarma_ctrl.messages_team;
 
 		if (messages.length > 10){
 			messages.shift();
