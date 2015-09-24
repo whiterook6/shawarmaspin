@@ -32,13 +32,11 @@ module.exports = {
 				},
 				connected_at: {
 					type: DataTypes.DATE,
-					allowNull: false,
-					defaultValue: DataTypes.NOW
+					allowNull: false
 				},
 				last_ping: {
 					type: DataTypes.DATE,
-					allowNull: false,
-					defaultValue: DataTypes.NOW
+					allowNull: false
 				}
 			}
 		);
