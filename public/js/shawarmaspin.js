@@ -217,7 +217,6 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 
 	shawarma_ctrl.socket.on('disconnect', function(data){
 		shawarma_ctrl.connected = false;
-		shawarma_ctrl.socket.disconnect();
 	});
 
 	shawarma_ctrl.interval = 1.0 / 60.0;
