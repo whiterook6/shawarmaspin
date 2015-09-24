@@ -100,7 +100,7 @@ h1 {
 
 .messages {
 	font-size: small;
-	margin-bottom: 10px;
+	margin: 10px auto;
 }
 
 #bottom_row {
@@ -129,4 +129,13 @@ h1 {
 	margin: 0 auto;
 	background-color: #F0F0F0;
 	color: black;
+}
+.tabs {
+	display: table;
+	width: 100%;
+}
+.tabs h1 {
+	border-bottom: 2px solid #F0F0F0;
+	display: table-cell;
+	padding: 8px;
 }
