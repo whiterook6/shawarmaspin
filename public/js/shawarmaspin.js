@@ -1,4 +1,4 @@
-angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interval', 'Socket', 'Team', 'Player', function($interval, Socket, Team, Player) {
+angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interval', 'Socket', 'Team', 'Player', 'Chat', function($interval, Socket, Team, Player, Chat) {
 	function print_score(score){
 		if (score < 10){
 			return score.toFixed(3);
@@ -42,7 +42,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	});
 
 	shawarma_ctrl.set_name = function(){
-		shawarma_ctrl.player.initials = Player.set_name(shawarma_ctrl.player.initials);
+		shawarma_ctrl.player.initials = Player.set_name(shawarma_ctrl.display.initials);
 		
 	};
 	shawarma_ctrl.reset_name = function(){
@@ -50,10 +50,12 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 
 	shawarma_ctrl.set_team = function(){
-		var result = Team.set_name(shawarma_ctrl.display.team);
-		if (result) {
-			shawarma_ctrl.player.team = result;
-			shawarma_ctrl.messages_team = [];
+		if (shawarma_ctrl.display.team) {
+			var result = Team.set_name(shawarma_ctrl.display.team);
+			if (result) {
+				shawarma_ctrl.player.team = result;
+				shawarma_ctrl.messages_team = [];
+			}
 		}
 	};
 	shawarma_ctrl.reset_team = function(){
@@ -69,35 +71,17 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 	shawarma_ctrl.send_message_global = function(){
 		if (shawarma_ctrl.new_message_global){
-			// add to local chat view
-			shawarma_ctrl.messages_global.push({
-				from: {
-					initials: shawarma_ctrl.player.initials
-				},
-				text: shawarma_ctrl.new_message_global
-			});
-
-			// emit the message
-			Socket.io.emit('message.global', {
-				message: shawarma_ctrl.new_message_global
-			});
+			var message = Chat.build_message(shawarma_ctrl.new_message_global);
+			shawarma_ctrl.messages_global.push(message);
+			Chat.to_global(message);
 			shawarma_ctrl.new_message_global = null;
 		}
 	};
 	shawarma_ctrl.send_message_team = function(){
 		if (shawarma_ctrl.new_message_team){
-			// add to local chat view
-			shawarma_ctrl.messages_team.push({
-				from: {
-					initials: shawarma_ctrl.player.initials
-				},
-				text: shawarma_ctrl.new_message_team
-			});
-
-			// emit the message
-			Socket.io.emit('message.team', {
-				message: shawarma_ctrl.new_message_team
-			});
+			var message = Chat.build_message(shawarma_ctrl.new_message_team);
+			shawarma_ctrl.messages_team.push(message);
+			Chat.to_team(message);
 			shawarma_ctrl.new_message_team = null;
 		}
 	};
@@ -277,13 +261,26 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	return Team;
 }])
 
-.factory('Chat', ['Socket', function(Socket) {
+.factory('Chat', ['Socket', 'Player', 'Team', function(Socket, Player, Team) {
 	var Chat = {
-		to_team: function() {
-
+		messages: {
+			global: [],
+			team: []
 		},
-		to_global: function() {
-
+		build_message: function(text) {
+			return {
+				from: {
+					initials: Player.initials,
+					team: Team.name
+				},
+				text: text
+			};
+		},
+		to_team: function(message) {
+			return Socket.io.emit('message.team', message);
+		},
+		to_global: function(message) {
+			return Socket.io.emit('message.global', message);
 		}
 	};
 	return Chat;
