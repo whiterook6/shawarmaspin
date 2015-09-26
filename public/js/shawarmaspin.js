@@ -79,21 +79,35 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 	shawarma_ctrl.send_message_global = function(){
 		if (shawarma_ctrl.new_message_global){
+			// add to local chat view
 			shawarma_ctrl.messages_global.push({
-				initials: shawarma_ctrl.player.initials,
+				from: {
+					initials: shawarma_ctrl.player.initials
+				},
+				text: shawarma_ctrl.new_message_global
+			});
+
+			// emit the message
+			shawarma_ctrl.socket.emit('message.global', {
 				message: shawarma_ctrl.new_message_global
 			});
-			shawarma_ctrl.socket.emit('message.global', shawarma_ctrl.new_message_global);
 			shawarma_ctrl.new_message_global = null;
 		}
 	};
 	shawarma_ctrl.send_message_team = function(){
 		if (shawarma_ctrl.new_message_team){
+			// add to local chat view
 			shawarma_ctrl.messages_team.push({
-				initials: shawarma_ctrl.player.initials,
+				from: {
+					initials: shawarma_ctrl.player.initials
+				},
+				text: shawarma_ctrl.new_message_team
+			});
+
+			// emit the message
+			shawarma_ctrl.socket.emit('message.team', {
 				message: shawarma_ctrl.new_message_team
 			});
-			shawarma_ctrl.socket.emit('message.team', shawarma_ctrl.new_message_team);
 			shawarma_ctrl.new_message_team = null;
 		}
 	};
