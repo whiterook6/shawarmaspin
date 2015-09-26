@@ -24,7 +24,7 @@ module.exports = {
 				length: 15,
 				allowNull: false
 			},
-			bought_by: {
+			triggered_by: {
 				type: DataTypes.INTEGER.UNSIGNED,
 				allowNull: false,
 				references: 'players',
@@ -37,7 +37,7 @@ module.exports = {
 				allowNull: false
 			},
 			strength: {
-				type: DataTypes.FLOAT.UNSIGNED,
+				type: DataTypes.FLOAT,
 				allowNull: false,
 			}
 		});
