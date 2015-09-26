@@ -71,17 +71,19 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 	shawarma_ctrl.send_message_global = function(){
 		if (shawarma_ctrl.new_message_global){
-			var message = Chat.build_message(shawarma_ctrl.new_message_global);
+			var message = new Chat.Message(shawarma_ctrl.new_message_global);
+			message.send_to_global();
+
 			shawarma_ctrl.messages_global.push(message);
-			Chat.to_global(message);
 			shawarma_ctrl.new_message_global = null;
 		}
 	};
 	shawarma_ctrl.send_message_team = function(){
 		if (shawarma_ctrl.new_message_team){
-			var message = Chat.build_message(shawarma_ctrl.new_message_team);
+			var message = new Chat.Message(shawarma_ctrl.new_message_team);
+			message.send_to_team();
+
 			shawarma_ctrl.messages_team.push(message);
-			Chat.to_team(message);
 			shawarma_ctrl.new_message_team = null;
 		}
 	};
@@ -92,6 +94,10 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		shawarma_ctrl.player.score = 0.0;
 		shawarma_ctrl.display.score = 0.0;
 		shawarma_ctrl.connected = true;
+	});
+
+	Socket.io.on('disconnect', function(data){
+		shawarma_ctrl.connected = false;
 	});
 
 	Socket.io.on('online', function(data){
@@ -202,10 +208,6 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		shawarma_ctrl.reset_team();
 	});
 
-	Socket.io.on('disconnect', function(data){
-		shawarma_ctrl.connected = false;
-	});
-
 	shawarma_ctrl.interval = 1.0 / 60.0;
 	$interval(function(){
 		shawarma_ctrl.player.score_minutes += shawarma_ctrl.interval / 60;
@@ -266,23 +268,30 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		messages: {
 			global: [],
 			team: []
-		},
-		build_message: function(text) {
-			return {
-				from: {
-					initials: Player.initials,
-					team: Team.name
-				},
-				text: text
-			};
-		},
-		to_team: function(message) {
-			return Socket.io.emit('message.team', message);
-		},
-		to_global: function(message) {
-			return Socket.io.emit('message.global', message);
 		}
 	};
+		
+	Message = function(text){
+		this.from = {
+			initials: Player.initials,
+			team: Team.name
+		};
+		this.text = text;
+	};
+
+	Message.prototype = {
+		constructor: Message,
+		
+		send_to_team: function(){
+			return Socket.io.emit('message.team', this);
+		},
+
+		send_to_global: function(){
+			return Socket.io.emit('message.global', this);
+		}
+	};
+
+	Chat.Message = Message;
 	return Chat;
 }]);
 
