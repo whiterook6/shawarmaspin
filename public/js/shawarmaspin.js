@@ -41,28 +41,18 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		new_message: null
 	});
 
-	shawarma_ctrl.set_initials = function(){
-		if (shawarma_ctrl.display.initials){
-			shawarma_ctrl.display.initials = shawarma_ctrl.display.initials.substring(0, 3);
-		}
+	shawarma_ctrl.set_name = function(){
+		shawarma_ctrl.player.initials = Player.set_name(shawarma_ctrl.player.initials);
 		
-		if (shawarma_ctrl.player.initials != shawarma_ctrl.display.initials){
-			shawarma_ctrl.player.initials = shawarma_ctrl.display.initials;
-			shawarma_ctrl.socket.emit('set_initials', shawarma_ctrl.player.initials);
-		}
 	};
-	shawarma_ctrl.reset_initials = function(){
+	shawarma_ctrl.reset_name = function(){
 		shawarma_ctrl.display.initials = shawarma_ctrl.player.initials;
 	};
 
 	shawarma_ctrl.set_team = function(){
-		if (shawarma_ctrl.display.team){
-			shawarma_ctrl.display.team = shawarma_ctrl.display.team.substring(0, 3);
-		}
-		
-		if (shawarma_ctrl.player.team != shawarma_ctrl.display.team){
-			shawarma_ctrl.player.team = shawarma_ctrl.display.team;
-			shawarma_ctrl.socket.emit('set_team', shawarma_ctrl.player.team);
+		var result = Team.set_name(shawarma_ctrl.display.team);
+		if (result) {
+			shawarma_ctrl.player.team = result;
 			shawarma_ctrl.messages_team = [];
 		}
 	};
@@ -71,7 +61,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 
 	shawarma_ctrl.update_name = function(){
-		shawarma_ctrl.set_initials();
+		shawarma_ctrl.set_name();
 		shawarma_ctrl.set_team();
 	};
 	shawarma_ctrl.needs_name_updated = function(){
@@ -242,6 +232,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	Socket.io.on('score_minutes', function(data){
 		shawarma_ctrl.player.score_minutes = parseFloat(data);
 	});
+}])
 
 .factory('Socket', [function() {
 	var Socket = {
@@ -249,6 +240,53 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 	return Socket;
 }])
+
+.factory('Player', ['Socket', function(Socket) {
+	var Player = {
+		initials: 'unk',
+		set_name: function(init) {
+			init = init.substring(0, 3);
+			if (init != this.initials) {
+				this.initials = init;
+				Socket.io.emit('set_initials', init);
+				return this.initials;
+			}
+			else {
+				return null;
+			}
+		}
+	};
+	return Player;
+}])
+
+.factory('Team', ['Socket', function(Socket) {
+	var Team = {
+		name: '',
+		set_name: function(name) {
+			name = name.substring(0, 3);
+			if (name !== this.name) {
+				this.name = name;
+				Socket.io.emit('set_team', name);
+				return this.name;
+			}
+			else {
+				return null;
+			}
+		}
+	};
+	return Team;
+}])
+
+.factory('Chat', ['Socket', function(Socket) {
+	var Chat = {
+		to_team: function() {
+
+		},
+		to_global: function() {
+
+		}
+	};
+	return Chat;
 }]);
 
 soundManager.setup({
