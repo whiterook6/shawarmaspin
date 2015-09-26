@@ -1,4 +1,4 @@
-angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interval', function($interval) {
+angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interval', 'Socket', 'Team', 'Player', 'Chat', function($interval, Socket, Team, Player, Chat) {
 	function print_score(score){
 		if (score < 10){
 			return score.toFixed(3);
@@ -41,29 +41,21 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		new_message: null
 	});
 
-	shawarma_ctrl.set_initials = function(){
-		if (shawarma_ctrl.display.initials){
-			shawarma_ctrl.display.initials = shawarma_ctrl.display.initials.substring(0, 3);
-		}
+	shawarma_ctrl.set_name = function(){
+		shawarma_ctrl.player.initials = Player.set_name(shawarma_ctrl.display.initials);
 		
-		if (shawarma_ctrl.player.initials != shawarma_ctrl.display.initials){
-			shawarma_ctrl.player.initials = shawarma_ctrl.display.initials;
-			shawarma_ctrl.socket.emit('set_initials', shawarma_ctrl.player.initials);
-		}
 	};
-	shawarma_ctrl.reset_initials = function(){
+	shawarma_ctrl.reset_name = function(){
 		shawarma_ctrl.display.initials = shawarma_ctrl.player.initials;
 	};
 
 	shawarma_ctrl.set_team = function(){
-		if (shawarma_ctrl.display.team){
-			shawarma_ctrl.display.team = shawarma_ctrl.display.team.substring(0, 3);
-		}
-		
-		if (shawarma_ctrl.player.team != shawarma_ctrl.display.team){
-			shawarma_ctrl.player.team = shawarma_ctrl.display.team;
-			shawarma_ctrl.socket.emit('set_team', shawarma_ctrl.player.team);
-			shawarma_ctrl.messages_team = [];
+		if (shawarma_ctrl.display.team) {
+			var result = Team.set_name(shawarma_ctrl.display.team);
+			if (result) {
+				shawarma_ctrl.player.team = result;
+				shawarma_ctrl.messages_team = [];
+			}
 		}
 	};
 	shawarma_ctrl.reset_team = function(){
@@ -71,7 +63,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 
 	shawarma_ctrl.update_name = function(){
-		shawarma_ctrl.set_initials();
+		shawarma_ctrl.set_name();
 		shawarma_ctrl.set_team();
 	};
 	shawarma_ctrl.needs_name_updated = function(){
@@ -79,49 +71,30 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	};
 	shawarma_ctrl.send_message_global = function(){
 		if (shawarma_ctrl.new_message_global){
-			// add to local chat view
-			shawarma_ctrl.messages_global.push({
-				from: {
-					initials: shawarma_ctrl.player.initials
-				},
-				text: shawarma_ctrl.new_message_global
-			});
-
-			// emit the message
-			shawarma_ctrl.socket.emit('message.global', {
-				message: shawarma_ctrl.new_message_global
-			});
+			var message = Chat.build_message(shawarma_ctrl.new_message_global);
+			shawarma_ctrl.messages_global.push(message);
+			Chat.to_global(message);
 			shawarma_ctrl.new_message_global = null;
 		}
 	};
 	shawarma_ctrl.send_message_team = function(){
 		if (shawarma_ctrl.new_message_team){
-			// add to local chat view
-			shawarma_ctrl.messages_team.push({
-				from: {
-					initials: shawarma_ctrl.player.initials
-				},
-				text: shawarma_ctrl.new_message_team
-			});
-
-			// emit the message
-			shawarma_ctrl.socket.emit('message.team', {
-				message: shawarma_ctrl.new_message_team
-			});
+			var message = Chat.build_message(shawarma_ctrl.new_message_team);
+			shawarma_ctrl.messages_team.push(message);
+			Chat.to_team(message);
 			shawarma_ctrl.new_message_team = null;
 		}
 	};
 
-	shawarma_ctrl.socket = io.connect();
-	shawarma_ctrl.socket.on('connect', function(){
-		shawarma_ctrl.set_initials();
+	Socket.io.on('connect', function(){
+		shawarma_ctrl.set_name();
 		shawarma_ctrl.set_team();
 		shawarma_ctrl.player.score = 0.0;
 		shawarma_ctrl.display.score = 0.0;
 		shawarma_ctrl.connected = true;
 	});
 
-	shawarma_ctrl.socket.on('online', function(data){
+	Socket.io.on('online', function(data){
 		if (!data){
 			return;
 		}
@@ -134,7 +107,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	});
 
-	shawarma_ctrl.socket.on('high_scores', function(data){
+	Socket.io.on('high_scores', function(data){
 		if (!data){
 			return;
 		}
@@ -150,7 +123,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	});
 
-	shawarma_ctrl.socket.on('team_high_scores', function(data){
+	Socket.io.on('team_high_scores', function(data){
 		if (!data){
 			return;
 		}
@@ -168,7 +141,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	});
 
-	shawarma_ctrl.socket.on('team_online', function(data){
+	Socket.io.on('team_online', function(data){
 		if (!data){
 			return;
 		}
@@ -183,7 +156,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	});
 
-	shawarma_ctrl.socket.on('message.global', function(data){
+	Socket.io.on('message.global', function(data){
 		if (!data){
 			return;
 		}
@@ -197,7 +170,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		messages.push(data);
 	});
 
-	shawarma_ctrl.socket.on('message.team', function(data){
+	Socket.io.on('message.team', function(data){
 		if (!data){
 			return;
 		}
@@ -211,16 +184,16 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		messages.push(data);
 	});
 
-	shawarma_ctrl.socket.on('new_initials', function(data){
+	Socket.io.on('new_initials', function(data){
 		if (!data){
 			return;
 		}
 
 		shawarma_ctrl.player.initials = data;
-		shawarma_ctrl.reset_initials();
+		shawarma_ctrl.reset_name();
 	});
 
-	shawarma_ctrl.socket.on('new_team', function(data){
+	Socket.io.on('new_team', function(data){
 		if (!data){
 			return;
 		}
@@ -229,7 +202,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		shawarma_ctrl.reset_team();
 	});
 
-	shawarma_ctrl.socket.on('disconnect', function(data){
+	Socket.io.on('disconnect', function(data){
 		shawarma_ctrl.connected = false;
 	});
 
@@ -240,9 +213,77 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 
 	}, shawarma_ctrl.interval * 1000);
 
-	shawarma_ctrl.socket.on('score_minutes', function(data){
+	Socket.io.on('score_minutes', function(data){
 		shawarma_ctrl.player.score_minutes = parseFloat(data);
 	});
+}])
+
+.factory('Socket', [function() {
+	var Socket = {
+		io: io.connect()
+	};
+	return Socket;
+}])
+
+.factory('Player', ['Socket', function(Socket) {
+	var Player = {
+		initials: 'unk',
+		set_name: function(init) {
+			init = init.substring(0, 3);
+			if (init != this.initials) {
+				this.initials = init;
+				Socket.io.emit('set_initials', init);
+				return this.initials;
+			}
+			else {
+				return null;
+			}
+		}
+	};
+	return Player;
+}])
+
+.factory('Team', ['Socket', function(Socket) {
+	var Team = {
+		name: '',
+		set_name: function(name) {
+			name = name.substring(0, 3);
+			if (name !== this.name) {
+				this.name = name;
+				Socket.io.emit('set_team', name);
+				return this.name;
+			}
+			else {
+				return null;
+			}
+		}
+	};
+	return Team;
+}])
+
+.factory('Chat', ['Socket', 'Player', 'Team', function(Socket, Player, Team) {
+	var Chat = {
+		messages: {
+			global: [],
+			team: []
+		},
+		build_message: function(text) {
+			return {
+				from: {
+					initials: Player.initials,
+					team: Team.name
+				},
+				text: text
+			};
+		},
+		to_team: function(message) {
+			return Socket.io.emit('message.team', message);
+		},
+		to_global: function(message) {
+			return Socket.io.emit('message.global', message);
+		}
+	};
+	return Chat;
 }]);
 
 soundManager.setup({
