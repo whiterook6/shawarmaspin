@@ -41,6 +41,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		new_message: null
 	});
 
+	/* Controls */
 	shawarma_ctrl.set_name = function(){
 		shawarma_ctrl.player.initials = Player.set_name(shawarma_ctrl.display.initials);
 		
@@ -88,6 +89,7 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 		}
 	};
 
+	/* Socket Events */
 	Socket.io.on('connect', function(){
 		shawarma_ctrl.set_name();
 		shawarma_ctrl.set_team();
@@ -218,6 +220,12 @@ angular.module('ShawarmaSpinApp', []).controller('ShawarmaController', ['$interv
 	Socket.io.on('score_minutes', function(data){
 		shawarma_ctrl.player.score_minutes = parseFloat(data);
 	});
+
+	/* On Startup */
+	if (window.location.hash && window.location.hash.length === 4){ // window.location.hash = #TST
+		shawarma_ctrl.display.team = window.location.hash.slice(1);
+		shawarma_ctrl.set_team();
+	}
 }])
 
 .factory('Socket', [function() {
