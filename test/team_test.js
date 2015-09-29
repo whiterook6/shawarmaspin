@@ -1,9 +1,8 @@
 /**
  * Test dependencies.
  */
-var io = require('socket.io-client');
+require('./index.js')();
 var Team = require('../lib/team.js');
-var assert = require('assert');
 
 var socket_config = {
 	url: 'http://localhost:8080',
