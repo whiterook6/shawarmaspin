@@ -24,7 +24,7 @@ describe('User Module', function() {
 				assert.equal(data, 'BOB');
 				done();
 			});
-			client.on('connect', function() {
+			client.on('user.created', function() {
 				client.emit('set_initials', 'bob');
 			});
 		});
