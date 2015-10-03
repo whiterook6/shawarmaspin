@@ -1,0 +1,49 @@
+<div class="wrapper">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="bg score" ng-if="shawarma_ctrl.player.team">
+				<h1>Team: <span ng-bind="shawarma_ctrl.player.team"></span></h1>
+				<div class="scrollable">
+					<table class="table" id="online_board">
+						<thead>
+							<tr>
+								<th>Initials</th>
+								<th>Score</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="online in shawarma_ctrl.boards.team_online">
+								<td ng-bind="online.initials"></td>
+								<td ng-bind="online.score_minutes"></td>
+								<td ng-bind="'Online'"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="bg score">
+				<h1>Fellow Spinners
+					<span ng-bind="'('+shawarma_ctrl.boards.online.length + ' online)'"></span>
+				</h1>
+				<div class="scrollable">
+					<table class="table" id="online_board">
+						<thead>
+							<tr>
+								<th>Initials</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="online in shawarma_ctrl.boards.online">
+								<td ng-bind="online.initials"></td>
+								<td ng-bind="'Online'"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

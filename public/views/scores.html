@@ -1,0 +1,49 @@
+<div class="wrapper">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="bg score">
+				<h1>Top Teams</h1>
+				<table class="table" id="high_score_board">
+					<thead>
+						<tr>
+							<th></th>
+							<th>Team</th>
+							<th>Spins</th>
+							<th>SPM</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-if="score.score_minutes >= 1"
+							ng-repeat="score in shawarma_ctrl.boards.team_scores | limitTo:10">
+							<td ng-bind="'#'+ (score.rank + 1)"></td>
+							<td ng-bind="score.team"></td>
+							<td ng-bind="score.score_minutes"></td>
+							<td ng-bind="score.spm"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="bg score">
+				<h1>Top Spinners</h1>
+				<table class="table" id="high_score_board">
+					<thead>
+						<tr>
+							<th></th>
+							<th>Initials</th>
+							<th>Spins</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-if="score.score_minutes >= 1"
+							ng-repeat="score in shawarma_ctrl.boards.high_scores | limitTo:10">
+							<td ng-bind="'#'+ (score.rank + 1)"></td>
+							<td ng-bind="score.initials"></td>
+							<td ng-bind="score.score_minutes"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
