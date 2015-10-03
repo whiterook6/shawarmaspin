@@ -25,7 +25,7 @@ describe('User Module', function() {
 				done();
 			});
 
-			client.on('player.created', function() {
+			client.on('connect', function() {
 				client.emit('set_initials', 'bob');
 			});
 		});
