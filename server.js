@@ -8,7 +8,6 @@ var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.js');
 require('./lib')();
 
-
 // get password and connection info
 _prompt.start();
 _prompt.get({properties: {
@@ -43,7 +42,7 @@ _prompt.get({properties: {
 
 	setInterval(function(){
 		Player.emit_online_players();
-		Player.emit_high_scores();
+		Score.emit_high_scores();
 		Team.emit_team_high_scores();
 	}, 5000);
 
