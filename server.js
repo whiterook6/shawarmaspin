@@ -8,7 +8,6 @@ var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.js');
 require('./lib')();
 
-
 // get password and connection info
 _prompt.start();
 _prompt.get({properties: {
