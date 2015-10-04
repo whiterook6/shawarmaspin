@@ -4,6 +4,10 @@ var express = require('express'),
 	mysql = require('mysql'), // https://github.com/felixge/node-mysql/
 	_prompt = require('prompt'); // https://github.com/flatiron/prompt
 
+var Promise = require('bluebird');
+Promise.promisifyAll(require("mysql/lib/Pool").prototype);
+Promise.promisifyAll(require("mysql/lib/Connection").prototype)
+
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.js');
 require('./lib')();
