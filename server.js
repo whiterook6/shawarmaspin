@@ -10,7 +10,7 @@ var config = require('./config/config.js');
 require('./lib')();
 
 
-Logger.message('Shawarmaspin starting up...')
+Logger.message('Shawarmaspin starting up...');
 Logger.message('Dependencies loaded...');
 
 // get password and connection info
@@ -50,7 +50,7 @@ _prompt.get({properties: {
 
 	setInterval(function(){
 		Player.emit_online_players();
-		Player.emit_high_scores();
+		Score.emit_high_scores();
 		Team.emit_team_high_scores();
 	}, 5000);
 
