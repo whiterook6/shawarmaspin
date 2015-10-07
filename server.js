@@ -2,42 +2,41 @@
 var express = require('express'),
 	http = require('http'),
 	mysql = require('mysql'), // https://github.com/felixge/node-mysql/
-	_prompt = require('prompt'); // https://github.com/flatiron/prompt
+	_prompt = require('prompt'), // https://github.com/flatiron/prompt
+	promise = require('bluebird');
 
-var Promise = require('bluebird');
-Promise.promisifyAll(require("mysql/lib/Pool").prototype);
-Promise.promisifyAll(require("mysql/lib/Connection").prototype)
+promise.promisifyAll(require("mysql/lib/Pool").prototype);
+promise.promisifyAll(require("mysql/lib/Connection").prototype)
 
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.js');
+
 require('./lib')();
 
 // Create Server
 var app = express();
 app.use(express.static(__dirname + '/public'));
+
 var server = http.createServer(app);
-io = require('socket.io').listen(server);
-io.sockets.on('connection', Socket.connect);
+Socket.io = require('socket.io').listen(server);
+Socket.io.sockets.on('connection', Socket.connect);
 
 // make pool global so it's available everywhere
 // this is bad and will need to be changed
 pool = null;
 var Server = {
 	connectDB: function(pass) {
+		config.database.connectionLimit = 100;
+		config.database.password = pass;
+		config.database.debug = false;
 		pool = mysql.createPool({
-			connectionLimit: 100,
+			connectionLimit: config.database.connectionLimit,
 			host: config.database.host,
 			user: config.database.username,
-			password: pass,
+			password: config.database.password,
 			database: config.database.database,
-			debug: false
+			debug: config.database.debug
 		});
-
-		setInterval(function(){
-			Player.emit_online_players();
-			Score.emit_high_scores();
-			Team.emit_team_high_scores();
-		}, 5000);
 	},
 	start: function() {
 		server.listen(config.server.port);
@@ -69,3 +68,5 @@ if( !config.database.password ) {
 	Server.connectDB(config.database.password);
 	Server.start();
 }
+
+module.exports = Server;

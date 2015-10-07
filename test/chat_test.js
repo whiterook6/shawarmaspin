@@ -2,7 +2,6 @@
  * Test dependencies.
  */
 require('./index.js')();
-var Chat = require('../lib/chat.js');
 
 var socket_config = {
 	url: 'http://localhost:8080',
@@ -18,7 +17,7 @@ var socket_config = {
 describe('Chat Module', function() {
 	describe('messaging', function() {
 		it('send global message to the chatroom', function(done) {
-			var client = io.connect(socket_config.url, socket_config.options);
+			var client = io_client.connect(socket_config.url, socket_config.options);
 			var message = {
 				from: {
 					initials: 'TST'
@@ -40,7 +39,7 @@ describe('Chat Module', function() {
 		});
 
 		it('send team message to the right team chatroom', function(done) {
-			var client = io.connect(socket_config.url, socket_config.options);
+			var client = io_client.connect(socket_config.url, socket_config.options);
 			var message = {
 				from: {
 					initials: 'unk',

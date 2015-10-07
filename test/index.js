@@ -1,4 +1,6 @@
+require('../server.js');
+
 module.exports = function() {
-	this.io = require('socket.io-client');
+	this.io_client = require('socket.io-client');
 	this.assert = require('assert');
 };
