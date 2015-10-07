@@ -17,8 +17,8 @@ var app = express();
 app.use(express.static(__dirname + '/public'));
 
 var server = http.createServer(app);
-io = require('socket.io').listen(server);
-io.sockets.on('connection', Socket.connect);
+Socket.io = require('socket.io').listen(server);
+Socket.io.sockets.on('connection', Socket.connect);
 
 // make pool global so it's available everywhere
 // this is bad and will need to be changed
