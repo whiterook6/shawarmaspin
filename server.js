@@ -15,6 +15,7 @@ require('./lib')();
 // Create Server
 var app = express();
 app.use(express.static(__dirname + '/public'));
+
 var server = http.createServer(app);
 io = require('socket.io').listen(server);
 io.sockets.on('connection', Socket.connect);
@@ -69,3 +70,5 @@ if( !config.database.password ) {
 	Server.connectDB(config.database.password);
 	Server.start();
 }
+
+module.exports = Server;

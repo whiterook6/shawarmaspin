@@ -17,7 +17,7 @@ var socket_config = {
 describe('User Module', function() {
 	describe('set initials', function() {
 		it('should response with new initials', function(done) {
-			var client = io.connect(socket_config.url, socket_config.options);
+			var client = io_client.connect(socket_config.url, socket_config.options);
 
 			client.on('player.renamed', function(data) {
 				assert.equal(data, 'BOB');
