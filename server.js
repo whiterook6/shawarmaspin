@@ -2,8 +2,8 @@
 var express = require('express'),
 	http = require('http'),
 	mysql = require('mysql'), // https://github.com/felixge/node-mysql/
-	_prompt = require('prompt'); // https://github.com/flatiron/prompt
-var promise = require('bluebird');
+	_prompt = require('prompt'), // https://github.com/flatiron/prompt
+	promise = require('bluebird');
 
 promise.promisifyAll(require("mysql/lib/Pool").prototype);
 promise.promisifyAll(require("mysql/lib/Connection").prototype)
