@@ -33,12 +33,6 @@ var Server = {
 			database: config.database.database,
 			debug: false
 		});
-
-		setInterval(function(){
-			Player.emit_online_players();
-			Score.emit_high_scores();
-			Team.emit_team_high_scores();
-		}, 5000);
 	},
 	start: function() {
 		server.listen(config.server.port);
