@@ -20,7 +20,7 @@
 	},
 	"author": ["whiterook6", "mayppong"],
 	"scripts": {
-		"start": "node app.js",
+		"start": "node server.js",
 		"test": "./node_modules/.bin/mocha -R nyan"
 	}
 }

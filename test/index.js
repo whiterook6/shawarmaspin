@@ -1,4 +1,4 @@
-var Server = require('../server.js');
+require('../server.js');
 
 module.exports = function() {
 	this.io_client = require('socket.io-client');

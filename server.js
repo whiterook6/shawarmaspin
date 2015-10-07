@@ -3,13 +3,14 @@ var express = require('express'),
 	http = require('http'),
 	mysql = require('mysql'), // https://github.com/felixge/node-mysql/
 	_prompt = require('prompt'); // https://github.com/flatiron/prompt
+var promise = require('bluebird');
 
-var Promise = require('bluebird');
-Promise.promisifyAll(require("mysql/lib/Pool").prototype);
-Promise.promisifyAll(require("mysql/lib/Connection").prototype)
+promise.promisifyAll(require("mysql/lib/Pool").prototype);
+promise.promisifyAll(require("mysql/lib/Connection").prototype)
 
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.js');
+
 require('./lib')();
 
 // Create Server
@@ -25,13 +26,16 @@ Socket.io.sockets.on('connection', Socket.connect);
 pool = null;
 var Server = {
 	connectDB: function(pass) {
+		config.database.connectionLimit = 100;
+		config.database.password = pass;
+		config.database.debug = false;
 		pool = mysql.createPool({
-			connectionLimit: 100,
+			connectionLimit: config.database.connectionLimit,
 			host: config.database.host,
 			user: config.database.username,
-			password: pass,
+			password: config.database.password,
 			database: config.database.database,
-			debug: false
+			debug: config.database.debug
 		});
 	},
 	start: function() {
