@@ -25,7 +25,7 @@ Socket.io.sockets.on('connection', Socket.connect);
 // this is bad and will need to be changed
 pool = null;
 var Server = {
-	connectDB: function(pass) {
+	connect_db: function(pass) {
 		config.database.connectionLimit = 100;
 		config.database.password = pass;
 		config.database.debug = false;
@@ -38,11 +38,23 @@ var Server = {
 			debug: config.database.debug
 		});
 	},
+
+	disconnect_db: function(){
+		if (pool){
+			pool.end(function(error){
+				Logger.message("Connection Pool shut down.");
+			});
+			Logger.message("Shutting down Connection Pool.");
+		}
+	},
+
 	start: function() {
 		server.listen(config.server.port);
-		Logger.message('Shawarmaspin running...');
+		Logger.message('Shawarmaspin running.');
 	},
+
 	stop : function() {
+		Logger.message("Shutting down server.");
 		server.close();
 	}
 };
@@ -61,11 +73,11 @@ if( !config.database.password ) {
 			return;
 		}
 
-		Server.connectDB(input);
+		Server.connect_db(input);
 		Server.start();
 	});
 } else {
-	Server.connectDB(config.database.password);
+	Server.connect_db(config.database.password);
 	Server.start();
 }
 
