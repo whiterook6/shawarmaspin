@@ -6,7 +6,7 @@ var express = require('express'),
 	promise = require('bluebird');
 
 promise.promisifyAll(require("mysql/lib/Pool").prototype);
-promise.promisifyAll(require("mysql/lib/Connection").prototype)
+promise.promisifyAll(require("mysql/lib/Connection").prototype);
 
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.js');
