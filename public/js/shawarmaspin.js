@@ -220,13 +220,15 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 
 		shawarma_ctrl.interval = 1.0 / 60.0;
 		$interval(function(){
-			shawarma_ctrl.player.score_minutes += shawarma_ctrl.interval / 60;
+			shawarma_ctrl.interval_count ++;
+			shawarma_ctrl.player.score_minutes += shawarma_ctrl.interval / 60; // (should be about 1/3600), so every 60 frames it adds 1/60th of a minute
 			shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_minutes);
 
 		}, shawarma_ctrl.interval * 1000);
 
-		Socket.io.on('score_minutes', function(data){
-			shawarma_ctrl.player.score_minutes = parseFloat(data);
+		Socket.io.on('score', function(data){
+			shawarma_ctrl.player.score_minutes = parseFloat(data.seconds) / 60.0;
+			shawarma_ctrl.interval = parseFloat(data.speed) / 60.0; // should be around 1/60
 		});
 
 		if ($routeParams.team){
