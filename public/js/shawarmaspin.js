@@ -52,33 +52,41 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 		});
 
 		shawarma_ctrl.set_name = function(){
-			shawarma_ctrl.player.initials = Player.set_name(shawarma_ctrl.display.initials);
-			
+			if (shawarma_ctrl.display.initials == Player.initials){
+				return;
+			}
+
+			shawarma_ctrl.display.initials = Player.set_name(shawarma_ctrl.display.initials);
+			shawarma_ctrl.player.initals = shawarma_ctrl.display.initials;
 		};
 		shawarma_ctrl.reset_name = function(){
-			shawarma_ctrl.display.initials = shawarma_ctrl.player.initials;
+			shawarma_ctrl.display.initials = Player.initials;
 		};
 
 		shawarma_ctrl.set_team = function(){
-			if (shawarma_ctrl.display.team) {
-				var result = Team.set_name(shawarma_ctrl.display.team);
-				if (result) {
-					shawarma_ctrl.player.team = result;
-					shawarma_ctrl.messages_team = [];
-				}
+			if (shawarma_ctrl.display.team == Team.name){
+				return;
 			}
+
+			shawarma_ctrl.display.team = Team.set_name(shawarma_ctrl.display.team);
+			shawarma_ctrl.player.team = shawarma_ctrl.display.team;
+
+			shawarma_ctrl.messages_team = [];
 		};
+
 		shawarma_ctrl.reset_team = function(){
-			shawarma_ctrl.display.team = shawarma_ctrl.player.team;
+			shawarma_ctrl.display.team = Team.name;
 		};
 
 		shawarma_ctrl.update_name = function(){
 			shawarma_ctrl.set_name();
 			shawarma_ctrl.set_team();
 		};
+
 		shawarma_ctrl.needs_name_updated = function(){
-			return ((shawarma_ctrl.player.initials != shawarma_ctrl.display.initials) || (shawarma_ctrl.player.team != shawarma_ctrl.display.team));
+			return ((Player.initials != shawarma_ctrl.display.initials) || (Team.name != shawarma_ctrl.display.team));
 		};
+
 		shawarma_ctrl.send_message_global = function(){
 			if (shawarma_ctrl.new_message_global){
 				var message = new Chat.Message(shawarma_ctrl.new_message_global);
@@ -88,6 +96,7 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				shawarma_ctrl.new_message_global = null;
 			}
 		};
+
 		shawarma_ctrl.send_message_team = function(){
 			if (shawarma_ctrl.new_message_team){
 				var message = new Chat.Message(shawarma_ctrl.new_message_team);
@@ -247,7 +256,12 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 	.factory('Player', ['Socket', function(Socket) {
 		var Player = {
 			initials: 'unk',
+
 			set_name: function(init) {
+				if (!init){
+					return;
+				}
+
 				init = init.substring(0, 3);
 				if (init != this.initials) {
 					this.initials = init;
@@ -266,14 +280,16 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 		var Team = {
 			name: '',
 			set_name: function(name) {
-				name = name.substring(0, 3);
+				if (name){
+					name = name.substring(0, 3);
+				} else {
+					name = null;
+				}
+
 				if (name !== this.name) {
 					this.name = name;
 					Socket.io.emit('set_team', name);
 					return this.name;
-				}
-				else {
-					return null;
 				}
 			}
 		};
