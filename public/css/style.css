@@ -6,9 +6,36 @@
 	font-style: normal;
 }
 
+@-webkit-keyframes inner-glow {
+	0% {
+		-webkit-box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 0);
+	    -moz-box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 0);
+	    box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 0);
+	}
+	50% {
+		-webkit-box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 1);
+	    -moz-box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 1);
+	    box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 1);
+	}
+	100% {
+		-webkit-box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 0);
+	    -moz-box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 0);
+	    box-shadow: inset 0px 0px 300px 50px rgba(132, 13, 29, 0);
+	}
+}
+
 body {
 	font-family: 'Open Sans', sans-serif;
 	padding: 30px;
+}
+
+.glow {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	-webkit-animation:inner-glow ease-in-out 5s infinite;
 }
 
 /* VIDEO */
