@@ -28,21 +28,29 @@ module.exports = {
 				},
 				team: {
 					type: DataTypes.CHAR,
-					length: 3
+					length: 3,
+					allowNull: true,
+					defaultValue: null
+				},
+				score: {
+					type: DataTypes.FLOAT,
+					allowNull: false,
+					defaultValue: 0
 				},
 				connected_at: {
 					type: DataTypes.DATE,
 					allowNull: false
 				},
-				last_ping: {
+				disconnected_at: {
 					type: DataTypes.DATE,
-					allowNull: false
+					allowNull: true,
+					defaultValue: null
 				}
 			}
 		);
 
 		migration.addIndex('players',
-			['initials', 'team', 'connected_at', 'last_ping'],
+			['initials', 'team', 'connected_at', 'disconnected_at'],
 			{
 				indexName: 'intial_team_connection_index'
 			}
