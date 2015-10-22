@@ -35,9 +35,9 @@ module.exports = function(sequelize, Sequelize) {
 			}
 		},
 
-		last_ping: {
+		disconnected_at: {
 			type: Sequelize.DATE,
-			allowNull: false,
+			allowNull: true,
 			validate: {
 				isDate: true
 			}
