@@ -12,21 +12,21 @@
 		"name": "Poison",
 		"cost": 5,
 		"effects": [{
-			"time": 120, // in seconds
+			"time": 120,
 			"type": "multiply",
 			"target": "other-team",
-			"ratio": 0.5, // mulitply
-			"stack": "reset" // accumulate
+			"ratio": 0.5,
+			"stack": "reset"
 		}]
 	}, {
 		"name": "Freeze",
 		"cost": 10,
 		"effects": [{
-			"time": 120, // in seconds
+			"time": 120,
 			"type": "multiply",
 			"target": "other-team",
-			"ratio": 0, // mulitply
-			"stack": "reset" // accumulate
+			"ratio": 0,
+			"stack": "reset"
 		}]
 	}, {
 		"name": "Vampire",
