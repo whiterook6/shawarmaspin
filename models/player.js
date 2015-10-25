@@ -27,6 +27,10 @@ module.exports = function(sequelize, Sequelize) {
 			}
 		},
 
+		score: {
+			type: Sequelize.FLOAT
+		},
+
 		connected_at: {
 			type: Sequelize.DATE,
 			allowNull: false,
@@ -41,11 +45,41 @@ module.exports = function(sequelize, Sequelize) {
 			validate: {
 				isDate: true
 			}
+		},
+
+		effects: {
+			type: Sequelize.VIRTUAL,
+			validate: {
+				isArray: true
+			}
+		},
+		spm: {
+			type: Sequelize.VIRTUAL
 		}
 	}, {
 		tableName: 'players',
 		timestamps: false,
 		instanceMethods: {
+			ping: function() {
+				this.updateEffects();
+				this.applyEffects();
+			},
+			updateEffects: function() {
+				var activeEffects = [];
+				for(var i = this.effects.legnth; i >= 0; i--) {
+					var effect = this.effects[i];
+					if (!effect.expired()){
+						activeEffects.push(effect);
+					}
+				}
+
+				this.effects = activeEffects;
+			},
+			applyEffects: function() {
+				if (!this.effects.length) {
+					this.spm = 1;
+				}
+			}
 		}
 	});
 };
