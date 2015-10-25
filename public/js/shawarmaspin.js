@@ -48,8 +48,24 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			},
 			messages_global: [],
 			messages_team: [],
-			new_message: null
+			new_message: null,
+			spinning: false
 		});
+
+		Modernizr.on('videoautoplay', function(result){
+			if (result){
+				shawarma_ctrl.spinning = true;
+			} else {
+				shawarma_ctrl.spin = function(){
+					if (!shawarma_ctrl.spinning){
+						shawarma_ctrl.spinning = true;
+						document.getElementById("bgvid").play();
+					}
+				};
+			}
+		});
+
+		
 
 		shawarma_ctrl.set_name = function(){
 			if (shawarma_ctrl.display.initials == Player.initials){
