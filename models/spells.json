@@ -1,0 +1,48 @@
+{
+	"effects": [{
+		"name": "Burn",
+		"cost": 5,
+		"effects": [{
+			"time": 0,
+			"type": "subtract",
+			"target": "other-team",
+			"spins": 1
+		}]
+	}, {
+		"name": "Poison",
+		"cost": 5,
+		"effects": [{
+			"time": 120, // in seconds
+			"type": "multiply",
+			"target": "other-team",
+			"ratio": 0.5, // mulitply
+			"stack": "reset" // accumulate
+		}]
+	}, {
+		"name": "Freeze",
+		"cost": 10,
+		"effects": [{
+			"time": 120, // in seconds
+			"type": "multiply",
+			"target": "other-team",
+			"ratio": 0, // mulitply
+			"stack": "reset" // accumulate
+		}]
+	}, {
+		"name": "Vampire",
+		"cost": 5,
+		"effects": [{
+			"time": 120,
+			"type": "subtract",
+			"target": "self-team",
+			"spins": 1,
+			"stack": "accumulate"
+		}, {
+			"time": 120,
+			"type": "add",
+			"target": "self",
+			"spins": "total",
+			"stack": "accumulate"
+		}]
+	}]
+}
