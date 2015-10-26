@@ -32,7 +32,11 @@ module.exports = function(sequelize, Sequelize) {
 				len: 3
 			},
 			set: function(value) {
-				this.setDataValue('team', value.trim().toUpperCase().substring(0, 3));
+				if (value) {
+					this.setDataValue('team', value.trim().toUpperCase().substring(0, 3));
+				} else {
+					this.setDataValue('team', null);
+				}
 			}
 		},
 
@@ -56,6 +60,9 @@ module.exports = function(sequelize, Sequelize) {
 			}
 		},
 
+		/**
+		 * Virtual fields are fields that do not map to the DB
+		 */
 		effects: {
 			type: Sequelize.VIRTUAL,
 			validate: {
@@ -63,6 +70,9 @@ module.exports = function(sequelize, Sequelize) {
 			}
 		},
 		spm: {
+			type: Sequelize.VIRTUAL
+		},
+		socket: {
 			type: Sequelize.VIRTUAL
 		}
 	}, {
