@@ -27,18 +27,21 @@
 	</head>
 
 	<body ng-controller="ShawarmaController as shawarma_ctrl">
-		<video poster="/img/1080p.png" loop autoplay id="bgvid">
+		<video poster="/img/1080p.png" autoplay loop id="bgvid">
 			<source src="/vid/720p.webm" type="video/webm">
 		</video>
-		<div class="glow">&nbsp;</div>
+		<!-- <div class="glow">&nbsp;</div> -->
 		
 		<div id="bottom_row">
 			<div class="row">
 				<div class="col-sm-4 col-sm-offset-4">
-					<div class="bg score">
+					<div class="bg score" ng-if="shawarma_ctrl.spinning">
 						<h1>Your Score</h1>
 						<div class="your_score" id="your_score" ng-bind="shawarma_ctrl.display.score" ng-if="shawarma_ctrl.connected"></div>
 						<div class="your_score disconnected" id="your_score" ng-if="!shawarma_ctrl.connected">Disconnected</div>
+					</div>
+					<div class="bg score" ng-if="!shawarma_ctrl.spinning">
+						<button ng-click="shawarma_ctrl.spin()">Start spinning</button>
 					</div>
 				</div>
 			</div>
@@ -46,7 +49,7 @@
 
 		<div ng-view></div>
 
-
+		<script src="/js/modernizr-custom.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular-route.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
