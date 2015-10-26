@@ -1,9 +1,18 @@
+var inet = require('inet');
+
 module.exports = function(sequelize, Sequelize) {
 	return sequelize.define('Player', {
 		/* attributes */
 		ip: {
 			type: Sequelize.INTEGER.UNSIGNED,
-			allowNull: false
+			allowNull: false,
+			get: function(value) {
+				var ip = this.getDataValue('ip');
+				return inet.ntoa(ip);
+			},
+			set: function(ip) {
+				this.setDataValue('ip', inet.aton(ip));
+			}
 		},
 
 		initials: {
