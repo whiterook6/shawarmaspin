@@ -27,8 +27,10 @@ module.exports = {
 			triggered_by: {
 				type: DataTypes.INTEGER.UNSIGNED,
 				allowNull: false,
-				references: 'players',
-				referencesKey: 'id',
+				references: {
+					model: 'players',
+					key: 'id',
+				},
 				onUpdate: 'CASCADE',
 				onDelete: 'CASCADE'
 			},
