@@ -88,6 +88,16 @@ module.exports = function(sequelize, Sequelize) {
 				if (!this.effects.length) {
 					this.spm = 1;
 				}
+			},
+			/**
+			 * since we're still tracking the score in the player controller, we
+			 * need to pass that into the model for now.
+			 */
+			disconnect: function(score) {
+				return this.update({
+					disconnected_at: new Date(),
+					score: score
+				});
 			}
 		}
 	});
