@@ -166,3 +166,6 @@ h1 {
 	display: table-cell;
 	padding: 8px;
 }
+.tabs h1.underlined {
+	text-decoration: underline;
+}
