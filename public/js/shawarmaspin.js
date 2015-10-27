@@ -65,8 +65,6 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			}
 		});
 
-		
-
 		shawarma_ctrl.set_name = function(){
 			if (shawarma_ctrl.display.initials == Player.initials){
 				return;
@@ -123,6 +121,38 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			}
 		};
 
+		shawarma_ctrl.update_top_scores = function(){
+			for (var i = shawarma_ctrl.boards.high_scores.length - 1; i >= 0; i--) {
+				entry = shawarma_ctrl.boards.high_scores[i];
+				if (entry.spm > 0){
+					entry.score_minutes += entry.spm / 3600;
+					entry.display_score = print_score(entry.score_minutes);
+				}
+			}
+		};
+
+		shawarma_ctrl.update_team_online = function(){
+			for (var i = shawarma_ctrl.boards.team_online.length - 1; i >= 0; i--) {
+				var entry = shawarma_ctrl.boards.team_online[i];
+
+				if (entry.spm){
+					entry.score_minutes += entry.spm / 3600;
+					entry.display_score = print_score(entry.score_minutes);
+				}
+			}
+		};
+
+		shawarma_ctrl.update_team_high_scores = function(){
+			for (var i = shawarma_ctrl.boards.team_scores.length - 1; i >= 0; i--) {
+				var entry = shawarma_ctrl.boards.team_scores[i];
+
+				if (entry.spm){
+					entry.score_minutes += entry.spm / 3600;
+					entry.display_score = print_score(entry.score_minutes);
+				}
+			}
+		};
+
 		Socket.io.on('connect', function(){
 			shawarma_ctrl.set_name();
 			shawarma_ctrl.set_team();
@@ -159,7 +189,9 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				shawarma_ctrl.boards.high_scores.push({
 					rank: i,
 					initials: datum.initials,
-					score_minutes: print_score(datum.score_seconds / 60.0)
+					score_minutes: datum.score_seconds / 60.0,
+					display_score: print_score(datum.score_seconds / 60.0),
+					spm: datum.spm
 				});
 			}
 		});
@@ -176,7 +208,8 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				shawarma_ctrl.boards.team_scores.push({
 					rank: i,
 					team: datum.team,
-					score_minutes: print_score(datum.score_seconds / 60.0),
+					score_minutes: datum.score_seconds / 60.0,
+					display_score: print_score(datum.score_seconds / 60.0),
 					spm: datum.spm
 				});
 			}
@@ -192,7 +225,9 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				var datum = data[i];
 				shawarma_ctrl.boards.team_online.push({
 					initials: datum.initials,
-					score_minutes: print_score(datum.score_seconds / 60.0)
+					score_minutes: datum.score_seconds / 60.0,
+					display_score: print_score(datum.score_seconds / 60.0),
+					spm: datum.spm
 				});
 			}
 		});
@@ -245,9 +280,14 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 
 		shawarma_ctrl.interval = 1.0 / 60.0;
 		$interval(function(){
-			shawarma_ctrl.interval_count ++;
-			shawarma_ctrl.player.score_minutes += shawarma_ctrl.interval / 60; // (should be about 1/3600), so every 60 frames it adds 1/60th of a minute
-			shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_minutes);
+			if (shawarma_ctrl.connected){
+				shawarma_ctrl.update_top_scores();
+				shawarma_ctrl.update_team_online();
+				shawarma_ctrl.update_team_high_scores();
+
+				shawarma_ctrl.player.score_minutes += shawarma_ctrl.interval / 60; // (should be about 1/3600), so every 60 frames it adds 1/60th of a minute
+				shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_minutes);
+			}
 
 		}, shawarma_ctrl.interval * 1000);
 
