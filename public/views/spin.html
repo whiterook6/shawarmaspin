@@ -19,7 +19,7 @@
 						<tr ng-repeat="score in shawarma_ctrl.boards.team_scores | limitTo:4">
 							<td ng-bind="'#'+ (score.rank + 1)"></td>
 							<td ng-bind="score.team"></td>
-							<td ng-bind="score.score_minutes"></td>
+							<td ng-bind="score.display_score"></td>
 							<td ng-bind="score.spm"></td>
 						</tr>
 					</tbody>
@@ -40,7 +40,7 @@
 						<tr ng-repeat="score in shawarma_ctrl.boards.high_scores | limitTo:4">
 							<td ng-bind="'#'+ (score.rank + 1)"></td>
 							<td ng-bind="score.initials"></td>
-							<td ng-bind="score.score_minutes"></td>
+							<td ng-bind="score.display_score"></td>
 						</tr>
 					</tbody>
 				</table>
@@ -96,7 +96,7 @@
 					<tbody>
 						<tr ng-repeat="online in shawarma_ctrl.boards.team_online">
 							<td ng-bind="online.initials"></td>
-							<td ng-bind="online.score_minutes"></td>
+							<td ng-bind="online.display_score"></td>
 							<td ng-bind="'Online'"></td>
 						</tr>
 					</tbody>
@@ -126,8 +126,10 @@
 			<div class="bg score">
 				<h1>Chat</h1>
 				<div class="tabs">
-					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'global'">Global</h1>
-					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'team'" ng-if="shawarma_ctrl.player.team">Team</h1>
+					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'global'"
+						ng-class="{'underlined': shawarma_ctrl.chatrooms.view == 'global'}">Global</h1>
+					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'team'" ng-if="shawarma_ctrl.player.team"
+						ng-class="{'underlined': shawarma_ctrl.chatrooms.view == 'team'}">Team</h1>
 				</div>
 				<div ng-if="shawarma_ctrl.player.team && shawarma_ctrl.chatrooms.view === 'team'">
 					<div class="scrollable messages">

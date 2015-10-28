@@ -21,13 +21,41 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			}
 		}
 
+		function now(){
+			return (new Date() / 1000.0);
+		}
+
 		var shawarma_ctrl = this;
 		angular.extend(shawarma_ctrl, {
 			boards: {
 				online: [],
 				high_scores: [],
 				team_scores: [],
-				team_online: []
+				team_online: [],
+
+				/**
+				 * @param interval the number of seconds since the previous tick (eg 0.016 for 60FPS, etc.)
+				 */
+				tick: function(interval){
+					var i, entry;
+					for (i = this.high_scores.length - 1; i >= 0; i--) {
+						entry = this.high_scores[i];
+						entry.score_seconds += interval * entry.spm;
+						entry.display_score = print_score(entry.score_seconds / 60);
+					}
+
+					for (i = this.team_scores.length - 1; i >= 0; i--) {
+						entry = this.team_scores[i];
+						entry.score_seconds += interval * entry.spm;
+						entry.display_score = print_score(entry.score_seconds / 60);
+					}
+
+					for (i = this.team_online.length - 1; i >= 0; i--) {
+						entry = this.team_online[i];
+						entry.score_seconds += interval * entry.spm;
+						entry.display_score = print_score(entry.score_seconds / 60);
+					}
+				}
 			},
 
 			display: {
@@ -39,7 +67,8 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			player: {
 				initials: 'unk',
 				team: null,
-				score_minutes: 0.0
+				score_seconds: 0,
+				spm: 1
 			},
 
 			chatrooms: {
@@ -64,8 +93,6 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				};
 			}
 		});
-
-		
 
 		shawarma_ctrl.set_name = function(){
 			if (shawarma_ctrl.display.initials == Player.initials){
@@ -125,8 +152,14 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 
 		Socket.io.on('connect', function(){
 			shawarma_ctrl.set_name();
+			
+			if ($routeParams.team && !shawarma_ctrl.display.team){
+				shawarma_ctrl.display.team = $routeParams.team;
+			}
 			shawarma_ctrl.set_team();
-			shawarma_ctrl.player.score = 0.0;
+			
+			shawarma_ctrl.player.score_seconds = 0.0;
+			shawarma_ctrl.player.spm = 1;
 			shawarma_ctrl.display.score = 0.0;
 			shawarma_ctrl.connected = true;
 		});
@@ -159,7 +192,9 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				shawarma_ctrl.boards.high_scores.push({
 					rank: i,
 					initials: datum.initials,
-					score_minutes: print_score(datum.score_seconds / 60.0)
+					score_seconds: datum.score_seconds,
+					display_score: print_score(datum.score_seconds / 60.0),
+					spm: datum.spm
 				});
 			}
 		});
@@ -176,7 +211,8 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				shawarma_ctrl.boards.team_scores.push({
 					rank: i,
 					team: datum.team,
-					score_minutes: print_score(datum.score_seconds / 60.0),
+					score_seconds: datum.score_seconds,
+					display_score: print_score(datum.score_seconds / 60.0),
 					spm: datum.spm
 				});
 			}
@@ -192,7 +228,9 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				var datum = data[i];
 				shawarma_ctrl.boards.team_online.push({
 					initials: datum.initials,
-					score_minutes: print_score(datum.score_seconds / 60.0)
+					score_seconds: datum.score_seconds,
+					display_score: print_score(datum.score_seconds / 60.0),
+					spm: datum.spm
 				});
 			}
 		});
@@ -244,22 +282,25 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 		});
 
 		shawarma_ctrl.interval = 1.0 / 60.0;
+		shawarma_ctrl.last_tick = now();
 		$interval(function(){
-			shawarma_ctrl.interval_count ++;
-			shawarma_ctrl.player.score_minutes += shawarma_ctrl.interval / 60; // (should be about 1/3600), so every 60 frames it adds 1/60th of a minute
-			shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_minutes);
+			var delay = now() - shawarma_ctrl.last_tick;
+			shawarma_ctrl.last_tick = now();
+
+			if (shawarma_ctrl.connected){
+				shawarma_ctrl.boards.tick(delay);
+				shawarma_ctrl.player.score_seconds += delay * shawarma_ctrl.player.spm;
+				shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_seconds / 60);
+			}
 
 		}, shawarma_ctrl.interval * 1000);
 
 		Socket.io.on('score', function(data){
-			shawarma_ctrl.player.score_minutes = parseFloat(data.seconds) / 60.0;
-			shawarma_ctrl.interval = parseFloat(data.speed) / 60.0; // should be around 1/60
-		});
+			shawarma_ctrl.player.score_seconds = parseFloat(data.score_seconds);
+			shawarma_ctrl.player.spm = data.spm;
 
-		if ($routeParams.team){
-			shawarma_ctrl.display.team = $routeParams.team;
-			shawarma_ctrl.set_team();
-		}
+			shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_seconds);
+		});
 	}])
 
 	.factory('Socket', [function() {
