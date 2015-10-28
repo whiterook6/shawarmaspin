@@ -126,8 +126,10 @@
 			<div class="bg score">
 				<h1>Chat</h1>
 				<div class="tabs">
-					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'global'">Global</h1>
-					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'team'" ng-if="shawarma_ctrl.player.team">Team</h1>
+					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'global'"
+						ng-class="{'underlined': shawarma_ctrl.chatrooms.view == 'global'}">Global</h1>
+					<h1 ng-click="shawarma_ctrl.chatrooms.view = 'team'" ng-if="shawarma_ctrl.player.team"
+						ng-class="{'underlined': shawarma_ctrl.chatrooms.view == 'team'}">Team</h1>
 				</div>
 				<div ng-if="shawarma_ctrl.player.team && shawarma_ctrl.chatrooms.view === 'team'">
 					<div class="scrollable messages">
