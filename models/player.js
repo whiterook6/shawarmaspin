@@ -93,8 +93,8 @@ module.exports = function(sequelize, Sequelize) {
 					return;
 				}
 
-				this.last_tick = now;
 				var delay_seconds = now - this.last_tick;
+				this.last_tick = now;
 				this.score += delay_seconds * this.spm;
 
 				this.updateEffects();
@@ -125,7 +125,10 @@ module.exports = function(sequelize, Sequelize) {
 			// update the client about their score. See above for the score format
 			send_score: function(){
 				Logger.debug('Player.send_score');
-				this.socket.emit('score', this.score);
+				this.socket.emit('score', {
+					score_seconds: this.score,
+					spm: this.spm
+				});
 			},
 
 			/**
