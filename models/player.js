@@ -163,7 +163,7 @@ module.exports = function(sequelize, Sequelize) {
 			disconnect: function(score) {
 				return this.update({
 					disconnected_at: new Date(),
-					score: score
+					score: this.score
 				});
 			}
 		}
