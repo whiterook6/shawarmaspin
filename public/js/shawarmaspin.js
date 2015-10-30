@@ -299,7 +299,7 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			shawarma_ctrl.player.score_seconds = parseFloat(data.score_seconds);
 			shawarma_ctrl.player.spm = data.spm;
 
-			shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_seconds);
+			shawarma_ctrl.display.score = print_score(shawarma_ctrl.player.score_seconds / 60);
 		});
 	}])
 
