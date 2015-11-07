@@ -163,12 +163,22 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 
 		ctrl.socket = io.connect();
 		ctrl.socket.on('connect', function(){
-			ctrl.set_name();
-			
-			if ($routeParams.team && !ctrl.display.team){
+			// set initials if not 'unk':
+			if (ctrl.display.initials != 'unk'){
+				ctrl.player.initials = ctrl.display.initials;
+				ctrl.socket.emit('set_initials', ctrl.display.initials);
+			}
+
+
+			// set team if not null (or if route requites):
+			if ($routeParams.team){
 				ctrl.display.team = $routeParams.team;
 			}
-			ctrl.set_team();
+
+			if (ctrl.display.team){
+				ctrl.player.team = ctrl.display.team;
+				ctrl.socket.emit('set_team', ctrl.display.team);
+			}
 			
 			ctrl.player.score_seconds = 0.0;
 			ctrl.player.spm = 1;

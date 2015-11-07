@@ -134,7 +134,9 @@
 				<div ng-if="shawarma_ctrl.player.team && shawarma_ctrl.chatrooms.view === 'team'">
 					<div class="scrollable messages">
 						<div ng-repeat="message in shawarma_ctrl.messages_team">
-							<span ng-bind="message.from.initials"></span> :
+							<span ng-bind="message.from.initials"></span>
+							<span ng-if="message.from.team != ctrl.player.team"
+								ng-bind="'('+message.from.team+')'"></span> :
 							<span ng-bind="message.text"></span>
 						</div>
 						<div ng-if="shawarma_ctrl.messages_team.length == 0">
