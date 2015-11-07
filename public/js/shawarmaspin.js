@@ -12,9 +12,9 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 		function print_score(score){
 			if (score < 10){
 				return score.toFixed(3);
-			} else if (score < 100){
-				return score.toFixed(2);
 			} else if (score < 1000){
+				return score.toFixed(2);
+			} else if (score < 100000){
 				return score.toFixed(1);
 			} else {
 				return Math.floor(score);
