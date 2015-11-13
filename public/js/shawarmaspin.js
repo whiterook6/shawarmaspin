@@ -100,10 +100,10 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			}
 
 			ctrl.socket.emit('set_initials', ctrl.display.initials);
-			ctrl.player.initals = ctrl.display.initials;
+			ctrl.player.initials = ctrl.display.initials;
 		};
 		ctrl.reset_name = function(){
-			ctrl.display.initials = Player.initials;
+			ctrl.display.initials = ctrl.player.initals;
 		};
 
 		ctrl.set_team = function(){
