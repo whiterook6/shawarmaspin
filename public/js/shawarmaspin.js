@@ -161,7 +161,7 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			}
 		};
 
-		ctrl.socket = io.connect();
+		ctrl.socket = io.connect('http://ws.shawarmaspin.com/');
 		ctrl.socket.on('connect', function(){
 			// set initials if not 'unk':
 			if (ctrl.display.initials != 'unk'){
