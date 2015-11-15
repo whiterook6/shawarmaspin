@@ -156,6 +156,12 @@ module.exports = function(sequelize, Sequelize) {
 				}
 			},
 
+			updateScoreInDB: function(){
+				return this.update({
+					score: this.score
+				});
+			},
+
 			/**
 			 * since we're still tracking the score in the player controller, we
 			 * need to pass that into the model for now.
