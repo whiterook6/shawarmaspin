@@ -29,29 +29,38 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 		angular.extend(ctrl, {
 			boards: {
 				online: [],
-				high_scores: [],
-				team_scores: [],
-				team_online: [],
+				high_scores: {
+					count: 0,
+					members: []
+				},
+				team_scores: {
+					count: 0,
+					members: []
+				},
+				team_online: {
+					count: 0,
+					members: []
+				},
 
 				/**
 				 * @param interval the number of seconds since the previous tick (eg 0.016 for 60FPS, etc.)
 				 */
 				tick: function(interval){
 					var i, entry;
-					for (i = this.high_scores.length - 1; i >= 0; i--) {
-						entry = this.high_scores[i];
+					for (i = this.high_scores.members.length - 1; i >= 0; i--) {
+						entry = this.high_scores.members[i];
 						entry.score_seconds += interval * entry.spm;
 						entry.display_score = print_score(entry.score_seconds / 60);
 					}
 
-					for (i = this.team_scores.length - 1; i >= 0; i--) {
-						entry = this.team_scores[i];
+					for (i = this.team_scores.members.length - 1; i >= 0; i--) {
+						entry = this.team_scores.members[i];
 						entry.score_seconds += interval * entry.spm;
 						entry.display_score = print_score(entry.score_seconds / 60);
 					}
 
-					for (i = this.team_online.length - 1; i >= 0; i--) {
-						entry = this.team_online[i];
+					for (i = this.team_online.members.length - 1; i >= 0; i--) {
+						entry = this.team_online.members[i];
 						entry.score_seconds += interval * entry.spm;
 						entry.display_score = print_score(entry.score_seconds / 60);
 					}
