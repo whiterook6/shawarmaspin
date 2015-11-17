@@ -2,7 +2,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="bg score" ng-if="shawarma_ctrl.player.team">
-				<h1>Team: <span ng-bind="shawarma_ctrl.player.team"></span></h1>
+				<h1>Team: <span ng-bind="shawarma_ctrl.player.team"></span>: <span ng-bind="shawarma_ctrl.boards.team_online.count"></span></h1>
 				<div class="scrollable">
 					<table class="table" id="online_board">
 						<thead>
@@ -13,7 +13,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="online in shawarma_ctrl.boards.team_online">
+							<tr ng-repeat="online in shawarma_ctrl.boards.team_online.members">
 								<td ng-bind="online.initials"></td>
 								<td ng-bind="online.display_score"></td>
 								<td ng-bind="'Online'"></td>
@@ -25,7 +25,7 @@
 
 			<div class="bg score">
 				<h1>Fellow Spinners
-					<span ng-bind="'('+shawarma_ctrl.boards.online.length + ' online)'"></span>
+					<span ng-bind="': ' + shawarma_ctrl.boards.online.count + ' online'"></span>
 				</h1>
 				<div class="scrollable">
 					<table class="table" id="online_board">
@@ -36,7 +36,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="online in shawarma_ctrl.boards.online">
+							<tr ng-repeat="online in shawarma_ctrl.boards.online.members">
 								<td ng-bind="online.initials"></td>
 								<td ng-bind="'Online'"></td>
 							</tr>
