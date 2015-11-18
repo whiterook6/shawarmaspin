@@ -60,15 +60,15 @@ module.exports = function(sequelize, Sequelize) {
 			}
 		},
 
-		/**
-		 * Virtual fields are fields that do not map to the DB
-		 */
-		effects: {
-			type: new Sequelize.VIRTUAL(Sequelize.ARRAY),
-			validate: {
-				isArray: true
-			}
-		},
+		// /**
+		//  * Virtual fields are fields that do not map to the DB
+		//  */
+		// effects: {
+		// 	type: new Sequelize.VIRTUAL(Sequelize.ARRAY),
+		// 	validate: {
+		// 		isArray: true
+		// 	}
+		// },
 		spm: {
 			type: Sequelize.VIRTUAL
 		},
