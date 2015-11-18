@@ -2,9 +2,6 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 	.config(['$routeProvider', function($routeProvider){
 		$routeProvider
 			.when('/',       { templateUrl: 'views/spin.html',   controller: 'ShawarmaController', controllerAs: 'shawarma_ctrl' })
-			.when('/online', { templateUrl: 'views/online.html', controller: 'ShawarmaController', controllerAs: 'shawarma_ctrl' })
-			.when('/scores', { templateUrl: 'views/scores.html', controller: 'ShawarmaController', controllerAs: 'shawarma_ctrl' })
-			.when('/status', { templateUrl: 'views/status.html', controller: 'ShawarmaController', controllerAs: 'shawarma_ctrl' })
 			.when('/:team',  { templateUrl: 'views/spin.html',   controller: 'ShawarmaController', controllerAs: 'shawarma_ctrl' });
 	}])
 
@@ -28,10 +25,16 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 		var ctrl = this;
 		angular.extend(ctrl, {
 			boards: {
-				online: [],
+				online: {
+					count: 0,
+					members: []
+				},
+				team_online: {
+					count: 0,
+					members: []
+				},
 				high_scores: [],
 				team_scores: [],
-				team_online: [],
 
 				/**
 				 * @param interval the number of seconds since the previous tick (eg 0.016 for 60FPS, etc.)
@@ -50,8 +53,14 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 						entry.display_score = print_score(entry.score_seconds / 60);
 					}
 
-					for (i = this.team_online.length - 1; i >= 0; i--) {
-						entry = this.team_online[i];
+					for (i = this.team_online.members.length - 1; i >= 0; i--) {
+						entry = this.team_online.members[i];
+						entry.score_seconds += interval * entry.spm;
+						entry.display_score = print_score(entry.score_seconds / 60);
+					}
+
+					for (i = this.online.members.length - 1; i >= 0; i--){
+						entry = this.online.members[i];
 						entry.score_seconds += interval * entry.spm;
 						entry.display_score = print_score(entry.score_seconds / 60);
 					}
@@ -195,10 +204,18 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				return;
 			}
 
-			ctrl.boards.online = [];
-			for (var i = 0; i < data.length; i++) {
-				ctrl.boards.online.push({
-					initials: data[i].initials
+			ctrl.boards.online = {
+				count: data.count,
+				members: []
+			};
+			
+			for (var i = 0; i < data.members.length; i++) {
+				var datum = data.members[i];
+				ctrl.boards.online.members.push({
+					initials: datum.initials,
+					score_seconds: datum.score_seconds,
+					display_score: print_score(datum.score_seconds / 60),
+					spm: datum.spm
 				});
 			}
 		});
@@ -245,10 +262,14 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				return;
 			}
 
-			ctrl.boards.team_online = [];
-			for (var i = 0; i < data.length; i++) {
-				var datum = data[i];
-				ctrl.boards.team_online.push({
+			ctrl.boards.team_online = {
+				count: data.count,
+				members: []
+			};
+
+			for (var i = 0; i < data.members.length; i++) {
+				var datum = data.members[i];
+				ctrl.boards.team_online.members.push({
 					initials: datum.initials,
 					score_seconds: datum.score_seconds,
 					display_score: print_score(datum.score_seconds / 60.0),
@@ -336,5 +357,3 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			mySound.play();
 		}
 	});
-	soundManager.stopAll = function(){};
-	soundManager.stop = function(){};

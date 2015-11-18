@@ -84,43 +84,45 @@
 
 		<div class="col-sm-4">
 			<div class="bg score" ng-if="shawarma_ctrl.player.team">
-				<h1>Team: <span ng-bind="shawarma_ctrl.player.team"></span></h1>
-				<div class="scrollable"><table class="table" id="online_board">
-					<thead>
-						<tr>
-							<th>Initials</th>
-							<th>Score</th>
-							<th>Status</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="online in shawarma_ctrl.boards.team_online">
-							<td ng-bind="online.initials"></td>
-							<td ng-bind="online.display_score"></td>
-							<td ng-bind="'Online'"></td>
-						</tr>
-					</tbody>
-				</table></div>
+				<h1>Team #<span ng-bind="shawarma_ctrl.player.team"></span>: <span ng-bind="shawarma_ctrl.boards.team_online.count"></span></h1>
+				<div class="scrollable">
+					<table class="table" id="online_board">
+						<thead>
+							<tr>
+								<th>Initials</th>
+								<th>Score</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="online in shawarma_ctrl.boards.team_online.members">
+								<td ng-bind="online.initials"></td>
+								<td ng-bind="online.display_score"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 
 			<div class="bg score" ng-if="!shawarma_ctrl.player.team">
-				<h1>Fellow Spinners
-					<span ng-bind="'('+shawarma_ctrl.boards.online.length + ' online)'"></span>
+				<h1>Fellow Spinners:
+					<span ng-bind="shawarma_ctrl.boards.online.count"></span>
 				</h1>
-				<div class="scrollable"><table class="table" id="online_board">
-					<thead>
-						<tr>
-							<th>Initials</th>
-							<th>Status</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="online in shawarma_ctrl.boards.online">
-							<td ng-bind="online.initials"></td>
-							<td ng-bind="'Online'"></td>
-						</tr>
-					</tbody>
-				</table></div>
+				<div class="scrollable">
+					<table class="table" id="online_board">
+						<thead>
+							<tr>
+								<th>Initials</th>
+								<th>Score</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="online in shawarma_ctrl.boards.online.members">
+								<td ng-bind="online.initials"></td>
+								<td ng-bind="online.display_score"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 
 			<div class="bg score">
@@ -136,7 +138,7 @@
 						<div ng-repeat="message in shawarma_ctrl.messages_team">
 							<span ng-bind="message.from.initials"></span>
 							<span ng-if="message.from.team != ctrl.player.team"
-								ng-bind="'('+message.from.team+')'"></span> :
+								ng-bind="'('+message.from.team+')'"></span>:
 							<span ng-bind="message.text"></span>
 						</div>
 						<div ng-if="shawarma_ctrl.messages_team.length == 0">
@@ -153,7 +155,8 @@
 				<div ng-if="shawarma_ctrl.chatrooms.view === 'global'">
 					<div class="scrollable messages">
 						<div ng-repeat="message in shawarma_ctrl.messages_global">
-							<span ng-bind="message.from.initials"></span> :
+							<span ng-bind="message.from.initials"></span>
+							<span ng-bind="'(#' + message.from.team + ')'" ng-if="message.from.team"></span>:
 							<span ng-bind="message.text"></span>
 						</div>
 						<div ng-if="shawarma_ctrl.messages_global.length == 0">
