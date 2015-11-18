@@ -170,7 +170,7 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 			}
 		};
 
-		ctrl.socket = io.connect('http://ws.shawarmaspin.com/');
+		ctrl.socket = io.connect();
 		ctrl.socket.on('connect', function(){
 			// set initials if not 'unk':
 			if (ctrl.display.initials != 'unk'){
@@ -209,9 +209,13 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				members: []
 			};
 			
-			for (var i = 0; i < data.length; i++) {
+			for (var i = 0; i < data.members.length; i++) {
+				var datum = data.members[i];
 				ctrl.boards.online.members.push({
-					initials: data[i].initials
+					initials: datum.initials,
+					score_seconds: datum.score_seconds,
+					display_score: print_score(datum.score_seconds / 60),
+					spm: datum.spm
 				});
 			}
 		});
@@ -263,8 +267,8 @@ angular.module('ShawarmaSpinApp', ['ngRoute'])
 				members: []
 			};
 
-			for (var i = 0; i < data.length; i++) {
-				var datum = data[i];
+			for (var i = 0; i < data.members.length; i++) {
+				var datum = data.members[i];
 				ctrl.boards.team_online.members.push({
 					initials: datum.initials,
 					score_seconds: datum.score_seconds,

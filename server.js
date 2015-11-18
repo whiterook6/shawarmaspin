@@ -15,6 +15,7 @@ require('./lib')();
 
 // Create Server
 var app = express();
+app.use(express.static(__dirname + '/public', {maxAge: 86400000})); // cache for one day.		
 var server = http.createServer(app);
 Socket.io = require('socket.io').listen(server);
 Socket.io.sockets.on('connection', Socket.connect);
